@@ -362,9 +362,9 @@ function MSBuild {
 
     # Work around issues with Azure Artifacts credential provider
     # https://github.com/dotnet/arcade/issues/3932
-    if [[ "$ci" == true ]]; then
-      dotnet nuget locals http-cache -c
-    fi
+#    if [[ "$ci" == true ]]; then
+#      dotnet nuget locals http-cache -c
+#    fi
 
     local toolset_dir="${_InitializeToolset%/*}"
     local logger_path="$toolset_dir/$_InitializeBuildToolFramework/Microsoft.DotNet.Arcade.Sdk.dll"
