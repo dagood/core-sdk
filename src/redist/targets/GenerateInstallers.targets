@@ -10,7 +10,6 @@
                             GetCurrentRuntimeInformation;
                             GenerateMsis;
                             GeneratePkgs;
-                            GenerateRpms;
-                            GenerateDebs"
+                            GenerateRpms"
           />
 </Project>
