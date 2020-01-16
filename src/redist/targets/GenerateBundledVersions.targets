@@ -48,6 +48,11 @@
 
       <NetCoreRuntimePackRids Include="@(NetCore30RuntimePackRids)"/>
 
+      <NetCoreAppHostPackRids Include="
+          $(ProductMonikerRid);
+          @(NetCoreRuntimePackRids)
+          " />
+
       <AspNetCore30RuntimePackRids Include="
         win-x64;
         win-x86;
@@ -168,7 +173,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       TargetFramework="netcoreapp3.1"
                       AppHostPackNamePattern="Microsoft.NETCore.App.Host.**RID**"
                       AppHostPackVersion="$(_NETCoreAppPackageVersion)"
-                      AppHostRuntimeIdentifiers="@(NetCoreRuntimePackRids, '%3B')"
+                      AppHostRuntimeIdentifiers="@(NetCoreAppHostPackRids, '%3B')"
                       />
     
     <KnownFrameworkReference Include="Microsoft.WindowsDesktop.App"
