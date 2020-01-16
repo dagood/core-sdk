@@ -93,6 +93,11 @@
       <NetCoreAppHostRids Include="@(NetCore5AppHostRids)" />
       <NetCoreRuntimePackRids Include="@(NetCore5RuntimePackRids)" />
 
+      <NetCoreAppHostPackRids Include="
+          $(ProductMonikerRid);
+          @(NetCoreRuntimePackRids)
+          " />
+
       <AspNetCore30RuntimePackRids Include="
         win-x64;
         win-x86;
@@ -221,7 +226,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       TargetFramework="netcoreapp5.0"
                       AppHostPackNamePattern="Microsoft.NETCore.App.Host.**RID**"
                       AppHostPackVersion="$(_NETCoreAppPackageVersion)"
-                      AppHostRuntimeIdentifiers="@(NetCoreAppHostRids, '%3B')"
+                      AppHostRuntimeIdentifiers="@(NetCoreAppHostPackRids, '%3B')"
                       />
 
     <KnownCrossgen2Pack Include="Microsoft.NETCore.App.Crossgen2"
