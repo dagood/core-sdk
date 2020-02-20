@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))/dir.props" />
+
+  <PropertyGroup>
+    <BuildCommandArgs>--pack --configuration $(Configuration)</BuildCommandArgs>
+    <BuildCommandArgs>$(BuildCommandArgs) /p:PackageProjectUrl=https://github.com/dotnet/sdk</BuildCommandArgs>
+
+    <LogVerbosityOptOut>true</LogVerbosityOptOut>
+    <BuildCommandArgs>$(BuildCommandArgs) -v $(LogVerbosity)</BuildCommandArgs>
+    <BuildCommandArgs>$(BuildCommandArgs) -bl</BuildCommandArgs>
+    <BuildCommandArgs>$(BuildCommandArgs) -ci</BuildCommandArgs>
+    <BuildCommandArgs>$(BuildCommandArgs) $(FlagParameterPrefix)nodereuse $(ArcadeFalseBoolBuildArg)</BuildCommandArgs>
+
+    <!-- Pass in package version props using the Product Construction (ProdCon) API. -->
+    <BuildCommandArgs>$(BuildCommandArgs) /p:PB_PackageVersionPropsUrl=file:%2F%2F$(PackageVersionPropsPath)</BuildCommandArgs>
+
+    <BuildCommand>$(ProjectDirectory)\build$(ShellExtension) $(BuildCommandArgs)</BuildCommand>
+
+    <OrchestratedManifestBuildName>dotnet/sdk</OrchestratedManifestBuildName>
+    <!-- NuGet SDK resolver only checks nuget.config files. https://github.com/Microsoft/msbuild/issues/2914 -->
+    <NuGetConfigFile>$(ProjectDirectory)/NuGet.config</NuGetConfigFile>
+    <GlobalJsonFile>$(ProjectDirectory)global.json</GlobalJsonFile>
+
+    <DependencyVersionInputRepoApiImplemented>true</DependencyVersionInputRepoApiImplemented>
+    <OutputPlacementRepoApiImplemented>false</OutputPlacementRepoApiImplemented>
+    <PackagesOutput>$(ProjectDirectory)artifacts/packages/$(Configuration)/NonShipping/</PackagesOutput>
+
+    <EnvironmentRestoreSources>$(SourceBuiltPackagesPath)</EnvironmentRestoreSources>
+    <EnvironmentRestoreSources Condition="'$(OfflineBuild)' == 'true'">$(EnvironmentRestoreSources)%3B$(ReferencePackagesDir)%3B$(PrebuiltPackagesPath)</EnvironmentRestoreSources>
+    <EnvironmentRestoreSources Condition="'$(OfflineBuild)' != 'true'">$(EnvironmentRestoreSources)%3Bhttps://api.nuget.org/v3/index.json</EnvironmentRestoreSources>
+    <EnvironmentRestoreSources Condition="'$(OfflineBuild)' != 'true'">$(EnvironmentRestoreSources)%3Bhttps://dotnetfeed.blob.core.windows.net/dotnet-core/index.json</EnvironmentRestoreSources>
+    <EnvironmentRestoreSources Condition="'$(OfflineBuild)' != 'true'">$(EnvironmentRestoreSources)%3Bhttps://dotnetfeed.blob.core.windows.net/dotnet-tools-internal/index.json</EnvironmentRestoreSources>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <UseSourceBuiltSdkOverride Include="@(ArcadeSdkOverride)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EnvironmentVariables Include="RestoreSources=$(EnvironmentRestoreSources)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <RepositoryReference Include="arcade" />
+    <RepositoryReference Include="xliff-tasks" />
+    <RepositoryReference Include="core-setup" />
+    <RepositoryReference Include="msbuild" />
+    <RepositoryReference Include="newtonsoft-json" />
+    <RepositoryReference Include="newtonsoft-json901" />
+    <RepositoryReference Include="nuget-client" />
+  </ItemGroup>
+
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))/dir.targets" />
+</Project>

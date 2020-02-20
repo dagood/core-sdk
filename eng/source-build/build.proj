@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" InitialTargets="PrepareOutput" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="dir.props" />
+  <Import Project="eng/Versions.props" Condition="'$(OfflineBuild)' != 'true'" />
+
+  <UsingTask AssemblyFile="$(LeakDetectionTasksAssembly)" TaskName="CheckForPoison" />
+  <UsingTask AssemblyFile="$(XPlatSourceBuildTasksAssembly)" TaskName="CopyReferenceOnlyPackages" />
+  <UsingTask AssemblyFile="$(XPlatSourceBuildTasksAssembly)" TaskName="WriteUsageBurndownData" />
+  <UsingTask AssemblyFile="$(XPlatSourceBuildTasksAssembly)" TaskName="ReplaceTextInFile" />
+
+  <Target Name="Build" DependsOnTargets="PrepareOutput;InitBuild">
+    <Message Text="Build Environment: $(Platform) $(Configuration) $(TargetOS) $(TargetRid)" />
+
+    <MSBuild Projects="repos\$(RootRepo).proj" Targets="Build" BuildInParallel="$(BuildInParallel)" StopOnFirstFailure="true" />
+  </Target>
+
+  <Target Name="RunTests" DependsOnTargets="PrepareOutput;InitBuild">
+    <Message Text="Build Environment: $(Platform) $(Configuration) $(TargetOS) $(TargetRid)" />
+
+    <MSBuild Projects="repos\$(RootRepoTests).proj" Targets="Build" Properties="PrepForTests=true;SkipEnsurePackagesCreated=true" BuildInParallel="$(BuildInParallel)" StopOnFirstFailure="true" />
+    <MSBuild Projects="repos\$(RootRepoTests).proj" Targets="Build" Properties="RunTests=true;SkipEnsurePackagesCreated=true" BuildInParallel="$(BuildInParallel)" StopOnFirstFailure="true" />
+  </Target>
+
+  <Target Name="CreateRootRepoFile" AfterTargets="PrepareOutput">
+    <WriteLinesToFile Lines="$(RootRepo)" File="$(BaseIntermediatePath)rootrepo.txt" Overwrite="True" />
+  </Target>
+
+  <Target Name="PrepareOutput">
+    <MakeDir Directories="$(OutputPath)" />
+    <MakeDir Directories="$(LoggingDir)" />
+    <MakeDir Directories="$(GitInfoOutputDir)" />
+    <MakeDir Directories="$(IntermediatePath)" />
+    <MakeDir Directories="$(SourceBuiltBlobFeedDir)" />
+    <MakeDir Directories="$(SourceBuiltPackagesPath)" />
+    <MakeDir Directories="$(SourceBuiltAssetsDir)" />
+    <MakeDir Directories="$(LocalBlobStorageRoot)" />
+    <MakeDir Directories="$(MSBuildDebugPathTargetDir)" />
+    <MakeDir Directories="$(RoslynDebugPathTargetDir)" />
+    <MakeDir Directories="$(AspNetRazorBuildServerLogDir)" />
+    <MakeDir Condition="'$(OfflineBuild)' != 'true'" Directories="$(GeneratedSourcePathOnline)" />
+    <MakeDir Condition="'$(OfflineBuild)' == 'true'" Directories="$(GeneratedSourcePathOffline)" />
+  </Target>
+
+  <Target Name="InitBuild">
+    <MSBuild Projects="tools-local/init-build.proj" />
+  </Target>
+  
+  <Target Name="Clone">
+    <MSBuild Projects="tools-local/init-build.proj" Targets="FetchSources" />
+  </Target>
+
+  <Target Name="Clean">
+    <RemoveDir Directories="$(BaseOutputPath)" />
+  </Target>
+
+  <!--
+    Workaround: Skip Windows_NT.
+
+    When trying to CopyReferenceOnlyPackages, it gets errors like:
+
+      System.IO.IOException: The process cannot access the file
+      '<root>\packages\microsoft.codeanalysis.compilers\2.6.0-beta3-62316-02\microsoft.codeanalysis.compilers.nuspec'
+      because it is being used by another process.
+
+    We don't support producing a tarball on Windows, so there's little value in fixing this.
+  -->
+  <Target Name="CopyAndDisassembleReferenceOnlyPackages"
+          AfterTargets="Build"
+          Condition="'$(OfflineBuild)' != 'true' and '$(ArchiveDownloadedPackages)' == 'true' and '$(OS)' != 'Windows_NT'">
+
+    <CopyReferenceOnlyPackages
+        PackageCacheDir="$(PackagesDir)"
+        DllDestinationDir="$(ReferencePackagesSourceDir)"
+        IdentifiedPackagesDir="$(ReferencePackagesToDeleteDir)"
+        DestinationDir="$(ReferencePackagesStagingDir)"
+        />
+
+    <!-- Ildasm has trouble writing to paths that are longer than 260 chars. (see https://github.com/dotnet/coreclr/issues/20397)
+         Create a temporary path to write il output which will then be copied back to the reference-packages/source dir.
+    -->
+    <PropertyGroup>
+      <TempPath>$([System.IO.Path]::GetTempPath())</TempPath>
+      <IldasmTempOutputFolderName>$([System.IO.Path]::GetRandomFileName())</IldasmTempOutputFolderName>
+      <IldasmTempOutputPath>$([System.IO.Path]::Combine($(TempPath),$(IldasmTempOutputFolderName)))/</IldasmTempOutputPath>
+    </PropertyGroup>
+    
+    <ItemGroup>
+      <ReferenceOnlyPackages Include="$(ReferencePackagesToDeleteDir)**/*.nupkg" />
+      <ReferenceOnlyPackageDlls Include="$(ReferencePackagesSourceDir)**/*.dll" />
+    </ItemGroup>
+
+    <Message Importance="High" Text="Reference-only Packages:" />
+    <Message Importance="High" Text="%(ReferenceOnlyPackages.Identity)" />
+
+    <Message Importance="High" Text="[$([System.DateTime]::Now.ToString('HH:mm:ss.ff'))] Disassembling @(ReferenceOnlyPackageDlls->Count()) dlls" />
+    <MakeDir Directories="$(IldasmTempOutputPath)%(ReferenceOnlyPackageDlls.RecursiveDir)" />
+    <Exec Command="$(IldasmPath) %(ReferenceOnlyPackageDlls.Identity) -all -out=$(IldasmTempOutputPath)%(ReferenceOnlyPackageDlls.RecursiveDir)%(ReferenceOnlyPackageDlls.Filename).il" />
+    <Message Importance="High" Text="[$([System.DateTime]::Now.ToString('HH:mm:ss.ff'))] Disassembly done." />
+
+    <ItemGroup>
+      <IlSourceFiles Include="$(IldasmTempOutputPath)/**/*.il" />
+      <OldLicenseFiles Include="$(ReferencePackagesStagingDir)/**/dotnet_library_license.txt" />
+      <OldLicenseFiles Include="$(ReferencePackagesStagingDir)/**/License.rtf" />
+      <RefAssyNuspecFiles Include="$(ReferencePackagesStagingDir)/**/*.nuspec" />
+    </ItemGroup>
+
+    <Message Importance="High" Text="[$([System.DateTime]::Now.ToString('HH:mm:ss.ff'))] Copying @(IlSourceFiles->Count()) IL source files" />
+    <Copy SourceFiles="@(IlSourceFiles)" DestinationFiles="$(ReferencePackagesSourceDir)%(IlSourceFiles.RecursiveDir)%(IlSourceFiles.Filename).il" />
+    <Message Importance="High" Text="[$([System.DateTime]::Now.ToString('HH:mm:ss.ff'))] Copying IL source files done." />
+
+    <Message Importance="High" Text="[$([System.DateTime]::Now.ToString('HH:mm:ss.ff'))] Deleting disassembled dlls and temp il source" />
+    <Delete Files="@(ReferenceOnlyPackageDlls)" />
+    <RemoveDir Directories="$(IldasmTempOutputPath)" />
+    <Message Importance="High" Text="[$([System.DateTime]::Now.ToString('HH:mm:ss.ff'))] Deleting disassembled dlls and temp il source done." />
+
+    <!-- Update licenseUrl to MIT license where needed in nuspec files -->
+    <ReplaceTextInFile InputFile="%(RefAssyNuspecFiles.Identity)"
+        OldText="http://go.microsoft.com/fwlink/?LinkId=329770"
+        NewText="https://microsoft.mit-license.org/" />
+    <ReplaceTextInFile InputFile="%(RefAssyNuspecFiles.Identity)"
+        OldText="https://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm"
+        NewText="https://microsoft.mit-license.org/" />
+    <ReplaceTextInFile InputFile="%(RefAssyNuspecFiles.Identity)"
+        OldText="http://go.microsoft.com/fwlink/?LinkId=529443"
+        NewText="https://microsoft.mit-license.org/" />
+  </Target>
+
+  <Target Name="ReplaceLicenseFiles"
+          AfterTargets="CopyAndDisassembleReferenceOnlyPackages"
+          Outputs="%(OldLicenseFiles.Identity)"
+          Condition="'$(OfflineBuild)' != 'true' and '$(ArchiveDownloadedPackages)' == 'true' and '$(OS)' != 'Windows_NT'">
+    <!-- Create Item of all unique directories containing old licenses -->
+    <CreateItem Include="%(OldLicenseFiles.RelativeDir)">
+       <Output TaskParameter="Include" ItemName="DestinationDirs" />
+    </CreateItem>
+
+    <PropertyGroup>
+      <DestinationDirIdentity>%(DestinationDirs.Identity)</DestinationDirIdentity>
+    </PropertyGroup>
+    <ItemGroup>
+        <NewLicenseFile Include="$(ProjectDir)LICENSE.txt" />
+    </ItemGroup>
+    <Copy SourceFiles="@(NewLicenseFile)" DestinationFiles="@(NewLicenseFile->'$(DestinationDirIdentity)%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <Delete Files="@(OldLicenseFiles)" />
+  </Target>
+
+  <Target Name="DownloadSourceBuildReferencePackages"
+          AfterTargets="Build"
+          Condition="'$(OfflineBuild)' != 'true' and '$(OS)' != 'Windows_NT' and '$(SkipDownloadingReferencePackages)' != 'true'">
+    <DownloadFile 
+          SourceUrl="$(ReferencePackagesTarballUrl)$(ReferencePackagesTarballName).$(PrivateSourceBuildReferencePackagesPackageVersion).tar.gz"
+          DestinationFolder="$(ExternalTarballsDir)" />
+  </Target>
+
+  <Target Name="DownloadSourceBuiltArtifacts"
+          AfterTargets="Build"
+          Condition="'$(OfflineBuild)' != 'true' and '$(OS)' != 'Windows_NT' and '$(SkipDownloadingPreviouslySourceBuiltPackages)' != 'true'">
+    <DownloadFile 
+          SourceUrl="$(SourceBuiltArtifactsTarballUrl)$(SourceBuiltArtifactsTarballName).$(PrivateSourceBuiltArtifactsPackageVersion).tar.gz"
+          DestinationFolder="$(ExternalTarballsDir)" />
+  </Target>
+
+  <!-- After building, generate a prebuilt usage report. -->
+  <Target Name="ReportPrebuiltUsage"
+          AfterTargets="Build"
+          Condition="'$(SkipReportPrebuiltUsage)' != 'true'">
+    <MSBuild Projects="repos\$(RootRepo).proj" Targets="WritePrebuiltUsageData;ReportPrebuiltUsage" />
+  </Target>
+
+  <!--
+    Dev scenario: rewrite a prebuilt-report. This makes it easy to add data to an existing
+    prebuilt report without performing another full build. This doesn't reevalutate which packages
+    are prebuilts or search the projects: it uses the existing usage.xml file to generate report
+    XMLs based on the info put in bin/.
+  -->
+  <Target Name="RewritePrebuiltUsageReport">
+    <MSBuild Projects="repos\$(RootRepo).proj" Targets="ReportPrebuiltUsage" />
+  </Target>
+
+  <Target Name="ReportPoisonUsage"
+          AfterTargets="Build"
+          Condition="'$(EnablePoison)' == 'true' and '$(OfflineBuild)' == 'true'">
+    <ItemGroup>
+      <FinalCliTarball Include="$(SourceBuiltTarBallPath)**/*$(TarBallExtension)" />
+    </ItemGroup>
+    <CheckForPoison FilesToCheck="@(FinalCliTarball)"
+                    HashCatalogFilePath="$(PoisonReportDataFile)"
+                    MarkerFileName="$(PoisonMarkerFile)"
+                    PoisonReportOutputFilePath="$(PoisonUsageReportFile)" />
+  </Target>
+
+  <Target Name="GeneratePrebuiltBurndownData">
+    <WriteUsageBurndownData RootDirectory="$(ProjectDir)"
+                            PrebuiltBaselineFile="$(OnlineBaselineDataFile)"
+                            OutputFilePath="$(OnlinePrebuiltBurndownDataFile)" />
+    <WriteUsageBurndownData RootDirectory="$(ProjectDir)"
+                            PrebuiltBaselineFile="$(OfflineBaselineDataFile)"
+                            OutputFilePath="$(OfflinePrebuiltBurndownDataFile)" />
+  </Target>
+
+  <Target Name="RunSmokeTest" DependsOnTargets="GetProdConBlobFeedUrl">
+    <PropertyGroup>
+      <SmokeTestCommand>./smoke-test.sh</SmokeTestCommand>
+      <SmokeTestCommand>$(SmokeTestCommand) --minimal</SmokeTestCommand>
+      <SmokeTestCommand>$(SmokeTestCommand) --projectOutput</SmokeTestCommand>
+      <SmokeTestCommand>$(SmokeTestCommand) --configuration $(Configuration)</SmokeTestCommand>
+      <SmokeTestCommand>$(SmokeTestCommand) --archiveRestoredPackages</SmokeTestCommand>
+
+      <!-- Dev certs don't work on this platform. -->
+      <SmokeTestCommand Condition="'$(TargetOS)' == 'OSX'">$(SmokeTestCommand) --excludeWebHttpsTests</SmokeTestCommand>
+    </PropertyGroup>
+
+    <!--
+      Pass prodConBlobFeedUrl via EnvironmentVariables because it has '//' in it, which is
+      translated into '/' if it's passed in the Command arg.
+      This is also a problem when passing CLI feeds: https://github.com/dotnet/source-build/issues/561
+    -->
+    <Exec Command="$(SmokeTestCommand)"
+          EnvironmentVariables="prodConBlobFeedUrl=$(ProdConBlobFeedUrl)" />
+  </Target>
+
+  <UsingTask AssemblyFile="$(XPlatSourceBuildTasksAssembly)" TaskName="UploadToAzure" />
+
+  <Target Name="PublishPrebuiltReportData">
+    <Error Text="RelativeBlobPath must be set to a non-empty string." Condition="'$(RelativeBlobPath)' == ''" />
+    <Error Text="ContainerName must be set to a non-empty string." Condition="'$(ContainerName)' == ''" />
+    <Error Text="AzureAccountName must be set to a non-empty string." Condition="'$(AzureAccountName)' == ''" />
+    <Error Text="AzureAccessToken must be set to a non-empty string." Condition="'$(AzureAccessToken)' == ''" />
+
+    <ItemGroup>
+      <ItemsToPublish Include="$(PackageReportDir)*.xml" />
+      <ItemsToPublish Include="$(PackageReportDir)*.csv" />
+      <ItemsToPublish>
+        <RelativeBlobPath>$(RelativeBlobPath)/%(Filename)%(Extension)</RelativeBlobPath>
+      </ItemsToPublish>
+    </ItemGroup>
+
+    <Message Text="Uploading files to '$(AzureAccountName)' blob storage at $(ContainerName)/$(RelativeBlobPath)" />
+
+    <UploadToAzure AccountName="$(AzureAccountName)"
+                   AccountKey="$(AzureAccessToken)"
+                   ContainerName="$(ContainerName)"
+                   Items="@(ItemsToPublish)"
+                   Overwrite="true" />
+  </Target>
+
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))/dir.targets" />
+
+</Project>

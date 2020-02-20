@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="coreclr.common.props" />
+
+  <ItemGroup>
+    <RepositoryReference Include="linker" />
+    <RepositoryReference Include="roslyn" />
+    <RepositoryReference Include="coreclr-portable" Condition="'$(PortableBuild)' != 'true' and '$(TargetOS)' == 'Linux' and '$(SkipPortableRuntimeBuild)' != 'true'" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <BuiltSdkPackageOverride Include="@(ILSdkOverride)" />
+  </ItemGroup>
+
+  <Target Name="CopyTools"
+          AfterTargets="Package">
+    <PropertyGroup>
+      <CoreClrDestinationDir>$(ToolPackageExtractDir)coreclr-tools</CoreClrDestinationDir>
+      <AssemblyExtension Condition="'$(TargetOS)' == 'Linux'">so</AssemblyExtension>
+      <AssemblyExtension Condition="'$(TargetOS)' == 'FreeBSD'">so</AssemblyExtension>
+      <AssemblyExtension Condition="'$(TargetOS)' == 'OSX'">dylib</AssemblyExtension>
+      <AssemblyExtension Condition="'$(AssemblyExtension)' == ''">please define AssemblyExtension for $(TargetOS)</AssemblyExtension>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <CoreClrTools Include="$(ProjectDirectory)bin/Product/$(TargetOS).$(Platform).$(Configuration)/ilasm" />
+      <CoreClrTools Include="$(ProjectDirectory)bin/Product/$(TargetOS).$(Platform).$(Configuration)/ildasm" />
+      <CoreClrTools Include="$(ProjectDirectory)bin/Product/$(TargetOS).$(Platform).$(Configuration)/libcoreclr.$(AssemblyExtension)" />
+      <CoreClrTools Include="$(ProjectDirectory)bin/Product/$(TargetOS).$(Platform).$(Configuration)/System.Private.CoreLib.dll" />
+    </ItemGroup>
+
+    <Message Importance="High" Text="Copying source-built ILAsm and ILDasm '@(CoreClrTools)' to '$(CoreClrDestinationDir)'" />
+
+    <Copy SourceFiles="@(CoreClrTools)" DestinationFolder="$(CoreClrDestinationDir)" />
+  </Target>
+
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))/dir.targets" />
+</Project>

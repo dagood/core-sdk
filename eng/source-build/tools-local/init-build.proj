@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <!-- Don't try to import the target info file when building this project -->
+    <GeneratingStaticPropertiesFile>true</GeneratingStaticPropertiesFile>
+  </PropertyGroup>
+  <Import Project="..\dir.props" />
+  <Import Project="$(OfflineAllRepoPropsFile)" Condition="Exists('$(OfflineAllRepoPropsFile)')" />
+
+  <UsingTask AssemblyFile="$(SourceBuildTasksAssembly)" TaskName="GetHostInformation" />
+  <UsingTask AssemblyFile="$(XPlatSourceBuildTasksAssembly)" TaskName="WriteSourceRepoProperties" />
+  <UsingTask AssemblyFile="$(LeakDetectionTasksAssembly)" TaskName="MarkAndCatalogPackages" />
+  <UsingTask AssemblyFile="$(XPlatSourceBuildTasksAssembly)" TaskName="NuGetPack" />
+  <UsingTask AssemblyFile="$(XPlatSourceBuildTasksAssembly)" TaskName="ZipFileExtractToDirectory" />
+  
+
+  <PropertyGroup>
+    <BuildCompetedSuccessSemaphore>$(BaseIntermediatePath)/init-build-proj.complete</BuildCompetedSuccessSemaphore>
+    <SourceBuildMSBuildSdkResolverPath>$(DotNetSdkResolversDir)SourceBuild.MSBuildSdkResolver\SourceBuild.MSBuildSdkResolver.dll</SourceBuildMSBuildSdkResolverPath>
+  </PropertyGroup>
+
+  <Target Name="Build"
+    Inputs="$(TargetInfoProps)"
+    Outputs="$(BuildCompetedSuccessSemaphore)"
+    >
+    <CallTarget Targets="UnpackTarballs;BuildXPlatTasks;AcquireDarc;FetchSources;WriteSourceLinkMetadata;BuildTasks;ExtractToolPackage;InstallSourceBuildSdkResolver;WriteDynamicPropsToStaticPropsFiles;GenerateRootFs;ApplyPatches;PoisonPrebuiltPackages" />
+    <Touch Files="$(BuildCompetedSuccessSemaphore)" AlwaysCreate="true" />
+  </Target>
+
+  <Target Name="Clean">
+    <Delete Files="$(BuildCompetedSuccessSemaphore)" />
+  </Target>
+
+  <Target Name="InstallSourceBuildSdkResolver">
+    <Copy SourceFiles="$(XPlatSourceBuildTasksAssembly)"
+          DestinationFiles="$(SourceBuildMSBuildSdkResolverPath)" />
+  </Target>
+
+  <Target Name="UnpackTarballs" 
+          Condition="'$(OfflineBuild)' == 'true'">
+    <MakeDir Directories="$(ReferencePackagesDir)"  Condition="'$(CustomReferencePackagesPath)' == ''" />
+    <Exec Command="tar -xzf $(ExternalTarballsDir)$(ReferencePackagesTarballName).*.tar.gz"
+          WorkingDirectory="$(ReferencePackagesDir)"
+          Condition="'$(CustomReferencePackagesPath)' == ''" />
+
+    <MakeDir Directories="$(PrebuiltSourceBuiltPackagesPath)" Condition="'$(CustomPrebuiltSourceBuiltPackagesPath)' == ''" />
+    <Exec Command="tar -xzf $(ExternalTarballsDir)$(SourceBuiltArtifactsTarballName).*.tar.gz"
+          WorkingDirectory="$(PrebuiltSourceBuiltPackagesPath)"
+          Condition="'$(CustomPrebuiltSourceBuiltPackagesPath)' == ''" />
+
+    <Copy SourceFiles="$(PrebuiltSourceBuiltPackagesPath)PackageVersions.props" DestinationFiles="$(IntermediatePath)SourceBuiltPackageVersions.props" />
+  </Target>
+
+  <Target Name="BuildTasks">
+    <PropertyGroup Condition="'$(OfflineBuild)' == 'true'">
+      <OfflineSources>&quot;$(ReferencePackagesDir)%3B$(PrebuiltPackagesPath)&quot;</OfflineSources>
+    </PropertyGroup>
+    <Exec Command="$(DotNetCliToolDir)dotnet build tasks\Microsoft.DotNet.SourceBuild.Tasks\Microsoft.DotNet.SourceBuild.Tasks.csproj /p:RestoreSources=$(OfflineSources) /p:OfflineBuild=$(OfflineBuild)" />
+  </Target>
+
+  <Target Name="BuildXPlatTasks" DependsOnTargets="UnpackTarballs">
+    <PropertyGroup Condition="'$(OfflineBuild)' == 'true'">
+      <OfflineSources>&quot;$(ReferencePackagesDir)%3B$(PrebuiltPackagesPath)&quot;</OfflineSources>
+    </PropertyGroup>
+    <Exec Command="$(DotNetCliToolDir)dotnet build tasks\Microsoft.DotNet.SourceBuild.Tasks.XPlat\Microsoft.DotNet.SourceBuild.Tasks.XPlat.csproj /p:RestoreSources=$(OfflineSources) /p:OfflineBuild=$(OfflineBuild)" />
+  </Target>
+
+  <Target Name="GetRepoProjects">
+    <ItemGroup>
+      <RepoProjects Include="$(ProjectDir)repos/*.proj" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="ApplyPatches" DependsOnTargets="GetRepoProjects">
+    <Message Text="Applying patches only" />
+    <MSBuild Projects="@(RepoProjects)" Targets="ApplyPatches" BuildInParallel="$(BuildInParallel)" />
+  </Target>
+
+  <Target Name="GenerateRootFs" Condition="'$(OS)' != 'Windows_NT'">
+     <Exec Condition="$(Platform.Contains('arm')) AND '$(Platform)' != 'armel' AND '$(BuildArchitecture)' != 'arm64'" Command="$(ArmEnvironmentVariables) $(ProjectDir)cross/build-rootfs.sh" />
+     <Exec Condition="'$(Platform)' == 'armel'" Command="$(ArmEnvironmentVariables) $(ProjectDir)cross/armel/tizen-build-rootfs.sh" />
+  </Target>
+
+  <Target Name="BuildReferenceAssemblies" Condition="'$(OfflineBuild)' == 'true'">
+    <Message Importance="High" Text="[$([System.DateTime]::Now.ToString('HH:mm:ss.ff'))] Building reference-only assemblies." />
+    <ItemGroup>
+      <IlSource Include="$(ReferencePackagesSourceDir)**/*.il" />
+      <ReferenceAssemblyDirectories Include ="$(ReferencePackagesStagingDir)/**/*.nuspec" />
+    </ItemGroup>
+
+    <MakeDir Directories="$(ReferencePackagesStagingDir)%(IlSource.RecursiveDir)" />
+    <Exec Command="$(IlasmPath) %(IlSource.Identity) -dll -quiet -nologo -output=$(ReferencePackagesStagingDir)%(IlSource.RecursiveDir)%(IlSource.Filename).dll" />
+
+    <Message Importance="High" Text="[$([System.DateTime]::Now.ToString('HH:mm:ss.ff'))] Done building reference-only assemblies." />
+
+    <Message Importance="High" Text="[$([System.DateTime]::Now.ToString('HH:mm:ss.ff'))] Packing reference-only packages." />
+    <NugetPack Nuspecs="%(ReferenceAssemblyDirectories.Identity)"
+               OutputDirectory="$(ReferencePackagesDir)"
+               ExcludeEmptyDirectories="false"
+               CreateSymbolPackage="false" />
+    <Message Importance="High" Text="[$([System.DateTime]::Now.ToString('HH:mm:ss.ff'))] Done packing reference-only packages." />
+  </Target>
+
+
+  <Target Name="ExtractToolPackage"
+          DependsOnTargets="UnpackTarballs;BuildTasks"
+          Condition="'$(OfflineBuild)' == 'true'">
+    <ZipFileExtractToDirectory SourceArchive="$(PrebuiltSourceBuiltPackagesPath)Microsoft.DotNet.Arcade.Sdk.$(ARCADE_BOOTSTRAP_VERSION).nupkg"
+                               DestinationDirectory="$(ArcadeBootstrapPackageDir)microsoft.dotnet.arcade.sdk/$(ARCADE_BOOTSTRAP_VERSION)/"
+                               OverwriteDestination="true" />
+  </Target>
+
+  <Target Name="WriteDynamicPropsToStaticPropsFiles" DependsOnTargets="BuildTasks">
+    <GetHostInformation Condition="'$(TargetRid)' == ''">
+      <Output PropertyName="TargetRid" TaskParameter="Rid" />
+    </GetHostInformation>
+
+    <GetHostInformation Condition="'$(TargetOS)' == ''">
+      <Output PropertyName="TargetOS" TaskParameter="OSName" />
+    </GetHostInformation>
+
+    <PropertyGroup Condition="'$(PortableBuild)' == 'true'">
+      <TargetRid Condition="'$(TargetOS)' == 'FreeBSD'">freebsd-$(Platform)</TargetRid>
+      <TargetRid Condition="'$(TargetOS)' == 'OSX'">osx-$(Platform)</TargetRid>
+      <TargetRid Condition="'$(TargetOS)' == 'Linux'">linux-$(Platform)</TargetRid>
+      <TargetRid Condition="'$(TargetOS)' == 'Windows_NT'">win-$(Platform)</TargetRid>
+    </PropertyGroup>
+
+    <PropertyGroup>
+      <TargetInfoPropsContent>&lt;Project ToolsVersion=&quot;15.0&quot;&gt;
+  &lt;PropertyGroup&gt;
+    &lt;TargetRid&gt;$(TargetRid)&lt;/TargetRid&gt;
+    &lt;TargetOS&gt;$(TargetOS)&lt;/TargetOS&gt;
+  &lt;/PropertyGroup&gt;
+&lt;/Project&gt;</TargetInfoPropsContent>
+    </PropertyGroup>
+    <MakeDir Directories="$(IntermediatePath)" Condition="!Exists('$(IntermediatePath)')" />
+    <WriteLinesToFile File="$(TargetInfoProps)" Lines="$(TargetInfoPropsContent)" Overwrite="True" />
+  </Target>
+
+  <Target Name="PoisonPrebuiltPackages" Condition="'$(EnablePoison)' == 'true' and '$(OfflineBuild)' == 'true'">
+    <ItemGroup>
+      <PrebuiltPackages Include="$(PrebuiltPackagesPath)**/*.nupkg" />
+      <PrebuiltSourceBuiltPackages Include="$(PrebuiltSourceBuiltPackagesPath)**/*.nupkg" />
+    </ItemGroup>
+    <MarkAndCatalogPackages PackagesToMark="@(PrebuiltPackages)" CatalogOutputFilePath="$(PoisonReportDataFile)" MarkerFileName="$(PoisonMarkerFile)" />
+    <MarkAndCatalogPackages PackagesToMark="@(PrebuiltSourceBuiltPackages)" CatalogOutputFilePath="$(SourceBuiltPoisonReportDataFile)" MarkerFileName="$(SourceBuiltPoisonMarkerFile)" />
+  </Target>
+
+  <Target Name="AcquireDarc" Condition="'$(OfflineBuild)' != 'true'">
+    <Message Importance="High" Text="[$([System.DateTime]::Now.ToString('HH:mm:ss.ff'))] Installing Darc." />
+    <Exec Command="$(ProjectDir)eng/common/darc-init.sh --darcversion $(DarcVersion) --toolpath $(DarcInstallDir)" />
+    <Message Importance="High" Text="[$([System.DateTime]::Now.ToString('HH:mm:ss.ff'))] Done installing Darc." />
+  </Target>
+
+  <Target Name="FetchSources" Condition="'$(OfflineBuild)' != 'true'" DependsOnTargets="AcquireDarc">
+    <Message Importance="High" Text="[$([System.DateTime]::Now.ToString('HH:mm:ss.ff'))] Getting source code for repos in Version.Details.xml." />
+    <PropertyGroup>
+      <DarcCloneArguments>clone</DarcCloneArguments>
+      <DarcCloneArguments>$(DarcCloneArguments) --repos-folder $(ClonedSubmoduleDirectory)</DarcCloneArguments>
+      <DarcCloneArguments>$(DarcCloneArguments) --git-dir-folder $(ClonedSubmoduleGitRootDirectory)</DarcCloneArguments>
+      <DarcCloneArguments>$(DarcCloneArguments) --include-toolset</DarcCloneArguments>
+      <IgnoredRepos/>
+      <IgnoredRepos>$(IgnoredRepos);https://dev.azure.com/dnceng/internal/_git/dotnet-optimization</IgnoredRepos>
+      <IgnoredRepos>$(IgnoredRepos);https://dev.azure.com/devdiv/DevDiv/_git/DotNet-Trusted</IgnoredRepos>
+      <IgnoredRepos>$(IgnoredRepos);https://devdiv.visualstudio.com/DevDiv/_git/DotNet-Trusted</IgnoredRepos>
+      <IgnoredRepos>$(IgnoredRepos);https://dnceng@dev.azure.com/dnceng/internal/_git/dotnet-optimization</IgnoredRepos>
+      <IgnoredRepos>$(IgnoredRepos);https://dev.azure.com/dnceng/internal/_git/dotnet-core-setup</IgnoredRepos>
+      <IgnoredRepos>$(IgnoredRepos);https://github.com/dotnet/source-build-reference-packages</IgnoredRepos>
+      <DarcCloneArguments>$(DarcCloneArguments) --ignore-repos "$(IgnoredRepos)"</DarcCloneArguments>
+      <!-- required so Darc doesn't throw an error for missing auth -->
+      <AzDoPat Condition="'$(AzDoPat)' == ''">bogus</AzDoPat>
+      <DarcCloneArguments>$(DarcCloneArguments) --azdev-pat $(AzDoPat)</DarcCloneArguments>
+      <DarcCloneArguments>$(DarcCloneArguments) --github-pat bogus</DarcCloneArguments>
+      <!-- depth 0 should be sufficient for us since we explictly declare all our dependencies -->
+      <DarcCloneArguments>$(DarcCloneArguments) --depth 0</DarcCloneArguments>
+      <DarcCloneArguments>$(DarcCloneArguments) --debug</DarcCloneArguments>
+      <DarcCloneCommand>$(DotNetCliToolDir)dotnet $(DarcDll) $(DarcCloneArguments)</DarcCloneCommand>
+    </PropertyGroup>
+    <Message Importance="High" Text="[$([System.DateTime]::Now.ToString('HH:mm:ss.ff'))] Running Darc command: '$(DarcCloneCommand)' from working dir $(ProjectDir)" />
+    <Exec Command="$(DarcCloneCommand)" WorkingDirectory="$(ProjectDir)"  />
+    <Message Importance="High" Text="[$([System.DateTime]::Now.ToString('HH:mm:ss.ff'))] Done getting source code for repos in Version.Details.xml." />
+  </Target>
+
+  <Target Name="WriteSourceLinkMetadata" Condition="'$(OfflineBuild)' != 'true'" DependsOnTargets="AcquireDarc;FetchSources">
+    <Message Importance="High" Text="[$([System.DateTime]::Now.ToString('HH:mm:ss.ff'))] Writing out SourceLink metadata." />
+    <WriteSourceRepoProperties
+       VersionDetailsFile="$(ProjectDir)eng/Version.Details.xml"
+       ClonedSubmoduleGitRootDirectory="$(ClonedSubmoduleGitRootDirectory)"
+       ClonedSubmoduleDirectory="$(ClonedSubmoduleDirectory)"
+       SourceBuildMetadataDir="$(GitInfoOutputDir)" />
+    <Message Importance="High" Text="[$([System.DateTime]::Now.ToString('HH:mm:ss.ff'))] Done writing out SourceLink metadata." />
+  </Target>
+
+</Project>
