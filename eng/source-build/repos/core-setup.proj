@@ -1,0 +1,17 @@
+<Project>
+
+  <Import Project="core-setup.common.props" />
+
+  <ItemGroup>
+    <RepositoryReference Include="coreclr" />
+    <RepositoryReference Include="corefx" />
+    <RepositoryReference Include="newtonsoft-json" />
+    <RepositoryReference Include="newtonsoft-json901" />
+    <RepositoryReference Include="roslyn" />
+    <RepositoryReference Include="standard" />
+    <RepositoryReference Include="core-setup-portable" Condition="'$(PortableBuild)' != 'true' and '$(TargetOS)' == 'Linux' and '$(SkipPortableRuntimeBuild)' != 'true'" />
+  </ItemGroup>
+
+  <Import Project="core-setup.common.targets" />
+
+</Project>

@@ -1,0 +1,52 @@
+<Project>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
+  <PropertyGroup>
+    <!-- 'restore' and 'build' switches automatically passed by build.sh/ps1. -->
+    <BuildCommandArgs />
+    <BuildCommandArgs>$(BuildCommandArgs) $(FlagParameterPrefix)pack</BuildCommandArgs>
+    <BuildCommandArgs>$(BuildCommandArgs) $(FlagParameterPrefix)configuration $(Configuration)</BuildCommandArgs>
+    <BuildCommandArgs>$(BuildCommandArgs) $(FlagParameterPrefix)nodereuse $(ArcadeFalseBoolBuildArg)</BuildCommandArgs>
+
+    <LogVerbosityOptOut>true</LogVerbosityOptOut>
+    <BuildCommandArgs>$(BuildCommandArgs) -v $(LogVerbosity)</BuildCommandArgs>
+    <BuildCommandArgs>$(BuildCommandArgs) -bl</BuildCommandArgs>
+    <BuildCommandArgs>$(BuildCommandArgs) -ci</BuildCommandArgs>
+    <BuildCommandArgs>$(BuildCommandArgs) $(FlagParameterPrefix)warnAsError $(ArcadeFalseBoolBuildArg)</BuildCommandArgs>
+
+    <BuildCommand>$(ProjectDirectory)\build$(ShellExtension) $(BuildCommandArgs)</BuildCommand>
+
+    <!-- NuGet SDK resolver only checks nuget.config files. https://github.com/Microsoft/msbuild/issues/2914 -->
+    <NuGetConfigFile>$(ProjectDirectory)/NuGet.config</NuGetConfigFile>
+
+    <GlobalJsonFile>$(ProjectDirectory)global.json</GlobalJsonFile>
+
+    <DependencyVersionInputRepoApiImplemented>true</DependencyVersionInputRepoApiImplemented>
+    <OutputPlacementRepoApiImplemented>false</OutputPlacementRepoApiImplemented>
+
+    <PackagesOutput>$(ProjectDirectory)artifacts/packages/$(Configuration)/NonShipping/</PackagesOutput>
+
+    <!-- we need to use a prebuilt Arcade to build Arcade -->
+    <UseBootstrapArcade>true</UseBootstrapArcade>
+    <IsToolingProject>true</IsToolingProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <UseSourceBuiltSdkOverride Include="@(ArcadeBootstrapSdkOverride)" />
+    <BuiltSdkPackageOverride Include="@(ArcadeSdkOverride)" />
+    <BuiltSdkPackageOverride Include="@(ArcadeConfigurationOverride)" />
+    <BuiltSdkPackageOverride Include="@(ArcadeCoreFxTestingOverride)" />
+    <BuiltSdkPackageOverride Include="@(ArcadePackagingOverride)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EnvironmentVariables Include="UsingToolMicrosoftNetCompilers=false" />
+    <EnvironmentVariables Include="useInstalledDotNetCli=false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <RepositoryReference Include="sourcelink" />
+  </ItemGroup>
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+</Project>
