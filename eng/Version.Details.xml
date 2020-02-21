@@ -42,27 +42,28 @@
       <Sha>0f7f38c4fd323b26da10cce95f857f77f0f09b48</Sha>
     </Dependency>
     <Dependency Name="Microsoft.AspNetCore.App.Ref" Version="3.1.2">
-      <Uri>https://github.com/dotnet/aspnetcore</Uri>
+      <!-- Caps here are changed to match source-build. -->
+      <Uri>https://github.com/dotnet/AspNetCore</Uri>
       <Sha>c3acdcac86dad91c3d3fbc3b93ecc6b7ba494bdc</Sha>
     </Dependency>
     <Dependency Name="Microsoft.AspNetCore.App.Runtime.win-x64" Version="3.1.2">
-      <Uri>https://github.com/dotnet/aspnetcore</Uri>
+      <Uri>https://github.com/dotnet/AspNetCore</Uri>
       <Sha>c3acdcac86dad91c3d3fbc3b93ecc6b7ba494bdc</Sha>
     </Dependency>
     <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="3.1.2-servicing.20068.1">
-      <Uri>https://github.com/dotnet/aspnetcore</Uri>
+      <Uri>https://github.com/dotnet/AspNetCore</Uri>
       <Sha>c3acdcac86dad91c3d3fbc3b93ecc6b7ba494bdc</Sha>
     </Dependency>
     <Dependency Name="dotnet-dev-certs" Version="3.1.2-servicing.20068.1">
-      <Uri>https://github.com/dotnet/aspnetcore</Uri>
+      <Uri>https://github.com/dotnet/AspNetCore</Uri>
       <Sha>c3acdcac86dad91c3d3fbc3b93ecc6b7ba494bdc</Sha>
     </Dependency>
     <Dependency Name="dotnet-user-secrets" Version="3.1.2-servicing.20068.1">
-      <Uri>https://github.com/dotnet/aspnetcore</Uri>
+      <Uri>https://github.com/dotnet/AspNetCore</Uri>
       <Sha>c3acdcac86dad91c3d3fbc3b93ecc6b7ba494bdc</Sha>
     </Dependency>
     <Dependency Name="dotnet-watch" Version="3.1.2-servicing.20068.1">
-      <Uri>https://github.com/dotnet/aspnetcore</Uri>
+      <Uri>https://github.com/dotnet/AspNetCore</Uri>
       <Sha>c3acdcac86dad91c3d3fbc3b93ecc6b7ba494bdc</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Test.ProjectTemplates.3.1" Version="1.0.2-beta4.19570.1">
@@ -255,9 +256,9 @@
   </ProductDependencies>
 
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19607.3">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19568.1">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>4d80b9cfa53e309c8f685abff3512f60c3d8a3d1</Sha>
+      <Sha>ce459ae07c3d7a1e68251268855e0bc7b3d97f75</Sha>
     </Dependency>
     <!--
       Source-build dependencies.

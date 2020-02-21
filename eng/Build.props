@@ -1,6 +1,30 @@
 <Project>
 
+  <Target Name="BuildUpstreamRepos"
+          Condition="
+            '$(FromSource)' == 'true' and
+            '$(InnerBuildFromSource)' != 'true'"
+          BeforeTargets="Execute">
+    <ItemGroup>
+      <RepositoryReference Include="aspnetcore" />
+      <RepositoryReference Include="newtonsoft-json" />
+      <RepositoryReference Include="newtonsoft-json901" />
+      <RepositoryReference Include="toolset" />
+    </ItemGroup>
+
+    <MSBuild
+      Projects="$(RepoRoot)eng\source-build\build.proj"
+      Targets="PrepareOutput;InitBuild"
+      Properties="RepoRoot=$(RepoRoot)" />
+
+    <MSBuild
+      Projects="@(RepositoryReference -> '$(RepoRoot)eng\source-build\repos\%(Identity).proj')"
+      Properties="RepoRoot=$(RepoRoot)"
+      StopOnFirstFailure="true" />
+  </Target>
+
   <Target Name="ExecuteWithSourceBuiltTooling"
+          DependsOnTargets="BuildUpstreamRepos"
           Condition="
             '$(FromSource)' == 'true' and
             '$(InnerBuildFromSource)' != 'true'"

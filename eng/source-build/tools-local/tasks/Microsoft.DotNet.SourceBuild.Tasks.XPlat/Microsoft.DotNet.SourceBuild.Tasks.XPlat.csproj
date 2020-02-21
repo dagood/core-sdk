@@ -30,7 +30,9 @@
   -->
   <ItemGroup>
     <SdkAssembly Include="$(SdkReferenceDir)Newtonsoft.Json.dll" />
-    <SdkAssembly Include="$(SdkReferenceDir)NuGet.*.dll" />
+    <SdkAssembly
+      Include="$(SdkReferenceDir)NuGet.*.dll"
+      Exclude="$(SdkReferenceDir)NuGet.CommandLine.XPlat.dll" />
   </ItemGroup>
 
   <ItemGroup>

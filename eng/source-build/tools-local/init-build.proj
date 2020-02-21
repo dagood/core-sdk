@@ -4,6 +4,7 @@
     <!-- Don't try to import the target info file when building this project -->
     <GeneratingStaticPropertiesFile>true</GeneratingStaticPropertiesFile>
   </PropertyGroup>
+
   <Import Project="..\dir.props" />
   <Import Project="$(OfflineAllRepoPropsFile)" Condition="Exists('$(OfflineAllRepoPropsFile)')" />
 
@@ -55,14 +56,32 @@
     <PropertyGroup Condition="'$(OfflineBuild)' == 'true'">
       <OfflineSources>&quot;$(ReferencePackagesDir)%3B$(PrebuiltPackagesPath)&quot;</OfflineSources>
     </PropertyGroup>
-    <Exec Command="$(DotNetCliToolDir)dotnet build tasks\Microsoft.DotNet.SourceBuild.Tasks\Microsoft.DotNet.SourceBuild.Tasks.csproj /p:RestoreSources=$(OfflineSources) /p:OfflineBuild=$(OfflineBuild)" />
+    <ItemGroup>
+      <TasksTargets Remove="@(TasksTargets)" />
+      <TasksTargets Include="Restore;Build" />
+    </ItemGroup>
+    <MSBuild
+      Projects="tasks\Microsoft.DotNet.SourceBuild.Tasks\Microsoft.DotNet.SourceBuild.Tasks.csproj"
+      Targets="%(TasksTargets.Identity)"
+      Properties="
+        RestoreSources=$(OfflineSources);
+        OfflineBuild=$(OfflineBuild)" />
   </Target>
 
   <Target Name="BuildXPlatTasks" DependsOnTargets="UnpackTarballs">
     <PropertyGroup Condition="'$(OfflineBuild)' == 'true'">
       <OfflineSources>&quot;$(ReferencePackagesDir)%3B$(PrebuiltPackagesPath)&quot;</OfflineSources>
     </PropertyGroup>
-    <Exec Command="$(DotNetCliToolDir)dotnet build tasks\Microsoft.DotNet.SourceBuild.Tasks.XPlat\Microsoft.DotNet.SourceBuild.Tasks.XPlat.csproj /p:RestoreSources=$(OfflineSources) /p:OfflineBuild=$(OfflineBuild)" />
+    <ItemGroup>
+      <TasksTargets Remove="@(TasksTargets)" />
+      <TasksTargets Include="Restore;Build" />
+    </ItemGroup>
+    <MSBuild
+      Projects="tasks\Microsoft.DotNet.SourceBuild.Tasks.XPlat\Microsoft.DotNet.SourceBuild.Tasks.XPlat.csproj"
+      Targets="%(TasksTargets.Identity)"
+      Properties="
+        RestoreSources=$(OfflineSources);
+        OfflineBuild=$(OfflineBuild)" />
   </Target>
 
   <Target Name="GetRepoProjects">
@@ -149,7 +168,7 @@
 
   <Target Name="AcquireDarc" Condition="'$(OfflineBuild)' != 'true'">
     <Message Importance="High" Text="[$([System.DateTime]::Now.ToString('HH:mm:ss.ff'))] Installing Darc." />
-    <Exec Command="$(ProjectDir)eng/common/darc-init.sh --darcversion $(DarcVersion) --toolpath $(DarcInstallDir)" />
+    <Exec Command="$(RepositoryEngineeringDir)common/darc-init.sh --darcversion $(DarcVersion) --toolpath $(DarcInstallDir)" />
     <Message Importance="High" Text="[$([System.DateTime]::Now.ToString('HH:mm:ss.ff'))] Done installing Darc." />
   </Target>
 
@@ -185,7 +204,7 @@
   <Target Name="WriteSourceLinkMetadata" Condition="'$(OfflineBuild)' != 'true'" DependsOnTargets="AcquireDarc;FetchSources">
     <Message Importance="High" Text="[$([System.DateTime]::Now.ToString('HH:mm:ss.ff'))] Writing out SourceLink metadata." />
     <WriteSourceRepoProperties
-       VersionDetailsFile="$(ProjectDir)eng/Version.Details.xml"
+       VersionDetailsFile="$(RepositoryEngineeringDir)Version.Details.xml"
        ClonedSubmoduleGitRootDirectory="$(ClonedSubmoduleGitRootDirectory)"
        ClonedSubmoduleDirectory="$(ClonedSubmoduleDirectory)"
        SourceBuildMetadataDir="$(GitInfoOutputDir)" />
