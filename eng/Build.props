@@ -1,6 +1,28 @@
 <Project>
 
-  <Target Name="PreventPrebuiltBuild" BeforeTargets="Execute">
+  <Target Name="ExecuteWithSourceBuiltTooling"
+          Condition="
+            '$(FromSource)' == 'true' and
+            '$(InnerBuildFromSource)' != 'true'"
+          BeforeTargets="Execute">
+    <!-- TODO: (source-build) Set up source-built Arcade, SDK, etc. -->
+
+    <PropertyGroup>
+      <InnerBuildArgs />
+      <InnerBuildArgs>$(InnerBuildArgs) /p:InnerBuildFromSource=true</InnerBuildArgs>
+      <InnerBuildArgs>$(InnerBuildArgs) /p:ArtifactsDir=$(ArtifactsDir)source-build/</InnerBuildArgs>
+      <InnerBuildArgs>$(InnerBuildArgs) /bl:$(ArtifactsDir)source-build/msbuild.binlog</InnerBuildArgs>
+
+      <PreventPrebuiltBuild>true</PreventPrebuiltBuild>
+    </PropertyGroup>
+
+    <Exec Command="$(REPO_BUILD_TOOL_COMMAND) $(InnerBuildArgs)" />
+  </Target>
+
+  <Target Name="PreventPrebuiltBuild"
+          DependsOnTargets="ExecuteWithSourceBuiltTooling"
+          Condition="'$(PreventPrebuiltBuild)' == 'true'"
+          BeforeTargets="Execute">
     <ItemGroup>
       <ProjectToBuild Remove="@(ProjectToBuild)" />
       <ProjectToBuild Include="$(MSBuildThisFileDirectory)No.proj" />

@@ -394,11 +394,16 @@ function MSBuild-Core {
     warnaserror_switch="/warnaserror"
   fi
 
-  "$_InitializeBuildTool" "$_InitializeBuildToolCommand" /m /nologo /clp:Summary /v:$verbosity /nr:$node_reuse $warnaserror_switch /p:TreatWarningsAsErrors=$warn_as_error /p:ContinuousIntegrationBuild=$ci "$@" || {
-    local exit_code=$?
-    Write-PipelineTaskError "Build failed (exit code '$exit_code')."
-    ExitWithExitCode $exit_code
+  RunBuildToolWithRecursiveInfo() {
+    export REPO_BUILD_TOOL_COMMAND="$_InitializeBuildTool $@"
+    "$_InitializeBuildTool" "$@" || {
+      local exit_code=$?
+      Write-PipelineTaskError "Build failed (exit code '$exit_code')."
+      ExitWithExitCode $exit_code
+    }
   }
+
+  RunBuildToolWithRecursiveInfo "$_InitializeBuildToolCommand" /m /nologo /clp:Summary /v:$verbosity /nr:$node_reuse $warnaserror_switch /p:TreatWarningsAsErrors=$warn_as_error /p:ContinuousIntegrationBuild=$ci "$@"
 }
 
 ResolvePath "${BASH_SOURCE[0]}"
