@@ -1,4 +1,5 @@
 <Project InitialTargets="SetNuGetPackagesEnvironment">
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
   <ItemGroup Condition="'$(OfflineBuild)' == 'true'">
     <EnvironmentVariables Include="LatestCommit=$(GitCommitHash)" />

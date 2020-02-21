@@ -34,6 +34,7 @@
 
   <PropertyGroup>
     <ProjectDir>$(MSBuildThisFileDirectory)</ProjectDir>
+    <RepositoryEngineeringDir>$([MSBuild]::NormalizeDirectory('$(ProjectDir)', '..'))</RepositoryEngineeringDir>
     <TargetsDir>$(ProjectDir)targets/</TargetsDir>
     <KeysDir>$(ProjectDir)keys/</KeysDir>
     <DotNetCliToolDir Condition="'$(DotNetCliToolDir)' == '' and '$(CustomDotNetSdkDir)' != ''">$([MSBuild]::EnsureTrailingSlash('$(CustomDotNetSdkDir)'))</DotNetCliToolDir>
@@ -84,9 +85,10 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <BaseOutputPath>$(ArtifactsDir)</BaseOutputPath>
+    <BaseOutputPath>$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'source-build'))</BaseOutputPath>
     <ClonedSubmoduleDirectory Condition="'$(ClonedSubmoduleDirectory)' == ''">$(BaseOutputPath)src/</ClonedSubmoduleDirectory>
-    <ClonedSubmoduleGitRootDirectory Condition="'$(ClonedSubmoduleGitRootDirectory)' == ''">$(ProjectDir).git/modules/src/</ClonedSubmoduleGitRootDirectory>
+    <ClonedSubmoduleGitRootDirectory Condition="'$(ClonedSubmoduleGitRootDirectory)' == '' and '$(KeepUpstreamGitDataInDotGit)' == 'true'">$(RepositoryEngineeringDir)../.git/modules/src/</ClonedSubmoduleGitRootDirectory>
+    <ClonedSubmoduleGitRootDirectory Condition="'$(ClonedSubmoduleGitRootDirectory)' == ''">$(ArtifactsDir)source-build\git\</ClonedSubmoduleGitRootDirectory>
     <ToolsDir>$(ProjectDir)Tools/</ToolsDir>
     <ToolPackageExtractDir>$(ToolsDir)source-built/</ToolPackageExtractDir>
     <ToolsLocalDir>$(ProjectDir)tools-local/</ToolsLocalDir>
@@ -95,10 +97,10 @@
     <DarcVersion>$([System.IO.File]::ReadAllText('$(ProjectDir)DarcVersion.txt').Trim())</DarcVersion>
     <DarcDll>$(DotNetCliToolDir)tools/.store/microsoft.dotnet.darc/$(DarcVersion)/microsoft.dotnet.darc/$(DarcVersion)/tools/netcoreapp3.0/any/Microsoft.DotNet.Darc.dll</DarcDll>
 
-    <TasksBinDir>$(TaskDirectory)Microsoft.DotNet.SourceBuild.Tasks/bin/$(Configuration)/</TasksBinDir>
+    <TasksBinDir>$(TaskDirectory)Microsoft.DotNet.SourceBuild.Tasks/bin/$(Configuration)/netstandard2.0/</TasksBinDir>
     <SourceBuildTasksAssembly>$(TasksBinDir)Microsoft.DotNet.SourceBuild.Tasks.dll</SourceBuildTasksAssembly>
 
-    <XPlatTasksBinDir>$(TaskDirectory)Microsoft.DotNet.SourceBuild.Tasks.XPlat/bin/$(Configuration)/</XPlatTasksBinDir>
+    <XPlatTasksBinDir>$(TaskDirectory)Microsoft.DotNet.SourceBuild.Tasks.XPlat/bin/$(Configuration)/netstandard2.0/</XPlatTasksBinDir>
     <XPlatSourceBuildTasksAssembly>$(XPlatTasksBinDir)Microsoft.DotNet.SourceBuild.Tasks.XPlat.dll</XPlatSourceBuildTasksAssembly>
 
     <LeakDetectionTasksBinDir>$(TaskDirectory)Microsoft.DotNet.SourceBuild.Tasks.LeakDetection/</LeakDetectionTasksBinDir>
