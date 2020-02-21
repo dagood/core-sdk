@@ -430,9 +430,8 @@ function MSBuild-Core {
     warnaserror_switch="/warnaserror"
   fi
 
-  function RunBuildTool {
-    export ARCADE_BUILD_TOOL_COMMAND="$_InitializeBuildTool $@"
-
+  RunBuildToolWithRecursiveInfo() {
+    export REPO_BUILD_TOOL_COMMAND="$_InitializeBuildTool $@"
     "$_InitializeBuildTool" "$@" || {
       local exit_code=$?
       Write-PipelineTaskError "Build failed (exit code '$exit_code')."
@@ -440,7 +439,7 @@ function MSBuild-Core {
     }
   }
 
-  RunBuildTool "$_InitializeBuildToolCommand" /m /nologo /clp:Summary /v:$verbosity /nr:$node_reuse $warnaserror_switch /p:TreatWarningsAsErrors=$warn_as_error /p:ContinuousIntegrationBuild=$ci "$@"
+  RunBuildToolWithRecursiveInfo "$_InitializeBuildToolCommand" /m /nologo /clp:Summary /v:$verbosity /nr:$node_reuse $warnaserror_switch /p:TreatWarningsAsErrors=$warn_as_error /p:ContinuousIntegrationBuild=$ci "$@"
 }
 
 ResolvePath "${BASH_SOURCE[0]}"
