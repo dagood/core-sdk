@@ -1,0 +1,10 @@
+<Project>
+
+  <Target Name="PreventPrebuiltBuild" BeforeTargets="Execute">
+    <ItemGroup>
+      <ProjectToBuild Remove="@(ProjectToBuild)" />
+      <ProjectToBuild Include="$(MSBuildThisFileDirectory)No.proj" />
+    </ItemGroup>
+  </Target>
+
+</Project>
