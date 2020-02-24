@@ -2,10 +2,15 @@
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
+  <PropertyGroup>
+    <!-- Fake, for SDK. -->
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
 
   <PropertyGroup>
     <Configuration Condition="$(Configuration) == ''">Release</Configuration>
 
+    <Platform Condition="'$(Platform)' == 'AnyCPU'"></Platform>
     <BuildArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture.ToString().ToLowerInvariant())</BuildArchitecture>
     <Platform Condition="'$(Platform)' == '' AND '$(BuildArchitecture)' == 'arm64'">$(BuildArchitecture)</Platform>
     <Platform Condition="'$(Platform)' == ''">x64</Platform>
@@ -28,12 +33,12 @@
     <DotNetCliToolDir Condition="'$(CustomDotNetSdkDir)' != ''">$([MSBuild]::EnsureTrailingSlash('$(CustomDotNetSdkDir)'))</DotNetCliToolDir>
     <DotnetToolCommand>$(DotNetCliToolDir)dotnet</DotnetToolCommand>
     <PatchesDir>$(ProjectDir)patches/</PatchesDir>
-    <PackagesDir>$(ProjectDir)packages/restored/</PackagesDir>
+    <PackagesDir>$(NuGetPackageRoot)</PackagesDir>
     <ArcadeBootstrapPackageDir>$(PackagesDir)ArcadeBootstrapPackage/</ArcadeBootstrapPackageDir>
-    <DotNetSdkDir>$(DotNetCliToolDir)sdk/$(SDK_VERSION)/</DotNetSdkDir>
-    <DotNetSdkResolversDir>$(DotNetSdkDir)SdkResolvers/</DotNetSdkResolversDir>
     <!-- if we're not currently building,  Visual Studio will still set this -->
     <SDK_VERSION Condition="'$(SDK_VERSION)' == ''">$(NETCoreSdkVersion)</SDK_VERSION>
+    <DotNetSdkDir>$(DotNetCliToolDir)sdk/$(SDK_VERSION)/</DotNetSdkDir>
+    <DotNetSdkResolversDir>$(DotNetSdkDir)SdkResolvers/</DotNetSdkResolversDir>
     <SdkReferenceDir>$(DotNetCliToolDir)sdk/$(SDK_VERSION)/</SdkReferenceDir>
   </PropertyGroup>
 

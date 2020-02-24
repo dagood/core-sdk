@@ -209,6 +209,25 @@
                                        OutputPath="$(RestoreSourcePropsPath)" />
   </Target>
 
+  <Target Name="CopyRepoGlobalJsonToPackageCacheForArcadeSdkLookup"
+          Condition="'$(GlobalJsonFile)' != ''"
+          BeforeTargets="Build">
+    <Copy SourceFiles="$(GlobalJsonFile)" DestinationFolder="$(NUGET_PACKAGES)" />
+  </Target>
+
+  <Target Name="PreventDirectoryBuildPropsEscape"
+          BeforeTargets="Build">
+    <ItemGroup>
+      <DirectoryBuildFilename Include="Directory.Build.targets" />
+      <DirectoryBuildFilename Include="Directory.Build.props" />
+    </ItemGroup>
+
+    <WriteLinesToFile
+      Lines="&lt;Project /&gt;"
+      File="$([MSBuild]::NormalizePath('$(ClonedSubmoduleDirectory)', '%(DirectoryBuildFilename.Identity)'))"
+      Overwrite="True" />
+  </Target>
+
   <Target Name="Build" DependsOnTargets="BuildRepoReferences">
     <Message Importance="High" Text="[$([System.DateTime]::Now.ToString('HH:mm:ss.ff'))] Building $(ProjectBuildReason)" />
     <Message Importance="High" Text="Running command:" />
