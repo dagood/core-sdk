@@ -207,12 +207,13 @@
                                        OutputPath="$(RestoreSourcePropsPath)" />
   </Target>
 
-  <!--
-    Generate blank directory build files above the repos, so they won't
-    automatically find the source-build directory build files ("escaping" their
-    directories and causing differences vs. ordinary build).
-  -->
-  <Target Name="PreventDirectoryBuildPropsTargetsEscape"
+  <Target Name="CopyRepoGlobalJsonToPackageCacheForArcadeSdkLookup"
+          Condition="'$(GlobalJsonFile)' != ''"
+          BeforeTargets="Build">
+    <Copy SourceFiles="$(GlobalJsonFile)" DestinationFolder="$(NUGET_PACKAGES)" />
+  </Target>
+
+  <Target Name="PreventDirectoryBuildPropsEscape"
           BeforeTargets="Build">
     <ItemGroup>
       <DirectoryBuildFilename Include="Directory.Build.targets" />

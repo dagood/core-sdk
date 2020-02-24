@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <Target Name="RepoRestore" BeforeTargets="Build" DependsOnTargets="UpdateNuGetConfig">
-    <Exec Command="$(DotnetToolCommand) restore FSharp.NET.Sdk.csproj $(OutputArgs) /v:$(LogVerbosity) $(RedirectRepoOutputToLog)"
+    <Exec Command="$(DotnetToolCommand) restore FSharp.NET.Sdk.csproj $(OutputArgs) /bl:restore.binlog /v:$(LogVerbosity) $(RedirectRepoOutputToLog)"
           WorkingDirectory="$(ProjectDirectory)"
           EnvironmentVariables="@(EnvironmentVariables)"
           IgnoreStandardErrorWarningFormat="true" />
