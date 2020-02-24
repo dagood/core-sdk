@@ -33,6 +33,7 @@
 
     <PropertyGroup>
       <InnerBuildArgs />
+      <InnerBuildArgs>$(InnerBuildArgs) /nr:false</InnerBuildArgs>
       <InnerBuildArgs>$(InnerBuildArgs) /p:InnerBuildFromSource=true</InnerBuildArgs>
       <InnerBuildArgs>$(InnerBuildArgs) /p:ArtifactsDir=$(ArtifactsDir)source-build/</InnerBuildArgs>
       <InnerBuildArgs>$(InnerBuildArgs) /bl:$(ArtifactsDir)source-build/msbuild.binlog</InnerBuildArgs>
