@@ -33,21 +33,13 @@
             '$(FromSource)' == 'true' and
             '$(InnerBuildFromSource)' != 'true'"
           BeforeTargets="Execute">
-    <!-- TODO: (source-build) Set up source-built Arcade, SDK, etc. -->
+    <MSBuild
+      Projects="$(RepoRoot)eng\source-build\repos\core-sdk.proj"
+      Properties="RepoRoot=$(RepoRoot)"
+      StopOnFirstFailure="true" />
 
-    <PropertyGroup>
-      <InnerBuildArgs />
-      <InnerBuildArgs>$(InnerBuildArgs) /nr:false</InnerBuildArgs>
-      <!-- Prevent infinite recursion. -->
-      <InnerBuildArgs>$(InnerBuildArgs) /p:InnerBuildFromSource=true</InnerBuildArgs>
-      <!-- Use a new artifacts dir for fresh tooling etc. -->
-      <InnerBuildArgs>$(InnerBuildArgs) /p:ArtifactsDir=$(ArtifactsDir)source-build/artifacts/</InnerBuildArgs>
-      <InnerBuildArgs>$(InnerBuildArgs) /bl:$(ArtifactsDir)source-build/msbuild.binlog</InnerBuildArgs>
-
-      <PreventPrebuiltBuild>true</PreventPrebuiltBuild>
-    </PropertyGroup>
-
-    <Exec Command="$(REPO_BUILD_TOOL_COMMAND) $(InnerBuildArgs)" />
+    <!-- TODO: (source-build) Use a recursive build like below with additional lightweight args, not full proj. -->
+    <!-- <Exec Command="$(REPO_BUILD_TOOL_COMMAND) $(InnerBuildArgs)" /> -->
   </Target>
 
   <Target Name="PreventPrebuiltBuild"
