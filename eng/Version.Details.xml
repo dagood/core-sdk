@@ -50,7 +50,8 @@
       <Uri>https://github.com/dotnet/AspNetCore</Uri>
       <Sha>c3acdcac86dad91c3d3fbc3b93ecc6b7ba494bdc</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="3.1.2-servicing.20068.1">
+    <!-- TODO: (source-build) Fix method for determining aspnet output version: find the stable one. -->
+    <!-- <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="3.1.2-servicing.20068.1">
       <Uri>https://github.com/dotnet/AspNetCore</Uri>
       <Sha>c3acdcac86dad91c3d3fbc3b93ecc6b7ba494bdc</Sha>
     </Dependency>
@@ -65,7 +66,7 @@
     <Dependency Name="dotnet-watch" Version="3.1.2-servicing.20068.1">
       <Uri>https://github.com/dotnet/AspNetCore</Uri>
       <Sha>c3acdcac86dad91c3d3fbc3b93ecc6b7ba494bdc</Sha>
-    </Dependency>
+    </Dependency> -->
     <Dependency Name="Microsoft.DotNet.Test.ProjectTemplates.3.1" Version="1.0.2-beta4.19570.1">
       <Uri>https://github.com/dotnet/test-templates</Uri>
       <Sha>5117d3d9d7dfd3583f0c42a639efaf092f957b7b</Sha>
