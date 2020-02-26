@@ -1,5 +1,7 @@
 <Project>
 
+  <Import Project="SourceBuild.targets" />
+
   <Target Name="BuildUpstreamRepos"
           Condition="
             '$(FromSource)' == 'true' and
@@ -24,7 +26,9 @@
   </Target>
 
   <Target Name="ExecuteWithSourceBuiltTooling"
-          DependsOnTargets="BuildUpstreamRepos"
+          DependsOnTargets="
+            BuildUpstreamRepos;
+            GetSourceBuildCommandConfiguration"
           Condition="
             '$(FromSource)' == 'true' and
             '$(InnerBuildFromSource)' != 'true'"
@@ -34,8 +38,10 @@
     <PropertyGroup>
       <InnerBuildArgs />
       <InnerBuildArgs>$(InnerBuildArgs) /nr:false</InnerBuildArgs>
+      <!-- Prevent infinite recursion. -->
       <InnerBuildArgs>$(InnerBuildArgs) /p:InnerBuildFromSource=true</InnerBuildArgs>
-      <InnerBuildArgs>$(InnerBuildArgs) /p:ArtifactsDir=$(ArtifactsDir)source-build/</InnerBuildArgs>
+      <!-- Use a new artifacts dir for fresh tooling etc. -->
+      <InnerBuildArgs>$(InnerBuildArgs) /p:ArtifactsDir=$(ArtifactsDir)source-build/artifacts/</InnerBuildArgs>
       <InnerBuildArgs>$(InnerBuildArgs) /bl:$(ArtifactsDir)source-build/msbuild.binlog</InnerBuildArgs>
 
       <PreventPrebuiltBuild>true</PreventPrebuiltBuild>
