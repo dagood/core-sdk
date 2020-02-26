@@ -35,7 +35,9 @@
           BeforeTargets="Execute">
     <MSBuild
       Projects="$(RepoRoot)eng\source-build\repos\core-sdk.proj"
-      Properties="RepoRoot=$(RepoRoot)"
+      Properties="
+        RepoRoot=$(RepoRoot);
+        SkipRepoReferences=true"
       StopOnFirstFailure="true" />
 
     <!-- TODO: (source-build) Use a recursive build like below with additional lightweight args, not full proj. -->
