@@ -7,11 +7,13 @@
 
   <PropertyGroup>
     <ProjectDirectory>$(RepoRoot)</ProjectDirectory>
-    <ProjectArtifactsDir>$([MSBuild]::NormalizeDirectory('$(BaseOutputPath)', 'core-sdk'))</ProjectArtifactsDir>
   </PropertyGroup>
 
   <PropertyGroup>
     <OSNameOverride>$(TargetRid.Substring(0, $(TargetRid.IndexOf("-"))))</OSNameOverride>
+
+    <ProjectArtifactsDir>$([MSBuild]::NormalizeDirectory('$(BaseOutputPath)', 'core-sdk'))</ProjectArtifactsDir>
+
     <BuildCommandArgs/>
     <BuildCommandArgs Condition="'$(TargetOS)' == 'Linux'">$(BuildCommandArgs) /p:Rid=$(TargetRid)</BuildCommandArgs>
     <BuildCommandArgs Condition="'$(TargetOS)' == 'Linux'">$(BuildCommandArgs) /p:AspNetCoreSharedFxInstallerRid=linux-$(Platform)</BuildCommandArgs>
