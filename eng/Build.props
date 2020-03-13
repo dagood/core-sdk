@@ -40,6 +40,10 @@
         SkipRepoReferences=true"
       StopOnFirstFailure="true" />
 
+    <PropertyGroup>
+      <PreventPrebuiltBuild>true</PreventPrebuiltBuild>
+    </PropertyGroup>
+
     <!-- TODO: (source-build) Use a recursive build like below with additional lightweight args, not full proj. -->
     <!-- <Exec Command="$(REPO_BUILD_TOOL_COMMAND) $(InnerBuildArgs)" /> -->
   </Target>
