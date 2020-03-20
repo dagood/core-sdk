@@ -2,6 +2,20 @@
 
   <Target Name="GetSourceBuildCommandConfiguration">
     <PropertyGroup>
+      <PlatformRid>centos.7</PlatformRid>
+      <PlatformArchRid>$(PlatformRid)-x64</PlatformArchRid>
+      <PortableArchRid>linux-x64</PortableArchRid>
+
+      <SourceBuildArtifactsDir>$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'source-build'))</CurrentRepoSourceBuildArtifactsDir>
+      <CurrentRepoSourceBuildArtifactsDir>$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'source-build', 'core-sdk'))</CurrentRepoSourceBuildArtifactsDir>
+
+      <SourceBuildReleaseDirUri>file://$(SourceBuildArtifactsDir)obj/x64/Release/</SourceBuildReleaseDirUri>
+
+      <SbPackageCacheDir>$([MSBuild]::NormalizeDirectory('$(CurrentRepoSourceBuildArtifactsDir)', '.packages'))</SbPackageCacheDir>
+      <SbDotNetCoreSdkDir>$([MSBuild]::NormalizeDirectory('$(CurrentRepoSourceBuildArtifactsDir)', '.dotnet'))</SbDotNetCoreSdkDir>
+    </PropertyGroup>
+
+    <PropertyGroup>
       <InnerBuildArgs>$(InnerBuildArgs) -c Release</InnerBuildArgs>
       <InnerBuildArgs>$(InnerBuildArgs) --nodereuse false</InnerBuildArgs>
       <InnerBuildArgs>$(InnerBuildArgs) -v minimal</InnerBuildArgs>
@@ -14,64 +28,41 @@
       <InnerBuildArgs>$(InnerBuildArgs) /p:UsePortableLinuxSharedFramework=false</InnerBuildArgs>
       <InnerBuildArgs>$(InnerBuildArgs) /p:IncludeSharedFrameworksForBackwardsCompatibilityTests=false</InnerBuildArgs>
 
-      <InnerBuildArgs>$(InnerBuildArgs) /p:Rid=centos.7-x64</InnerBuildArgs>
-      <InnerBuildArgs>$(InnerBuildArgs) /p:OSName=centos.7</InnerBuildArgs>
+      <InnerBuildArgs>$(InnerBuildArgs) /p:Rid=$(PlatformArchRid)</InnerBuildArgs>
+      <InnerBuildArgs>$(InnerBuildArgs) /p:OSName=$(PlatformRid)</InnerBuildArgs>
 
-      <InnerBuildArgs>$(InnerBuildArgs) /p:AspNetCoreSharedFxInstallerRid=linux-x64</InnerBuildArgs>
-      <InnerBuildArgs>$(InnerBuildArgs) /p:CoreSetupRid=centos.7-x64</InnerBuildArgs>
+      <InnerBuildArgs>$(InnerBuildArgs) /p:AspNetCoreSharedFxInstallerRid=$(PortableArchRid)</InnerBuildArgs>
+      <InnerBuildArgs>$(InnerBuildArgs) /p:CoreSetupRid=$(PlatformArchRid)</InnerBuildArgs>
 
-      <InnerBuildArgs>$(InnerBuildArgs) /p:ArtifactsDir=/work/artifacts/source-build/core-sdk/</InnerBuildArgs>
-      <InnerBuildArgs>$(InnerBuildArgs) /p:CoreSetupBlobRootUrl=file:///work/artifacts/source-build/obj/x64/Release/blobs/</InnerBuildArgs>
-      <InnerBuildArgs>$(InnerBuildArgs) /p:DotnetToolsetBlobRootUrl=file:///work/artifacts/source-build/obj/x64/Release/blobs/</InnerBuildArgs>
-      <InnerBuildArgs>$(InnerBuildArgs) /p:PB_PackageVersionPropsUrl=file:///work/artifacts/source-build/obj/x64/Release/PackageVersions.props</InnerBuildArgs>
-      <InnerBuildArgs>$(InnerBuildArgs) /p:DotNetPackageVersionPropsPath=/work/artifacts/source-build/obj/x64/Release/PackageVersions.props</InnerBuildArgs>
-      <InnerBuildArgs>$(InnerBuildArgs) /p:DotNetRestoreSourcePropsPath=/work/artifacts/source-build/obj/x64/Release/RestoreSources.props</InnerBuildArgs>
+      <InnerBuildArgs>$(InnerBuildArgs) /p:ArtifactsDir=$(CurrentRepoSourceBuildArtifactsDir)</InnerBuildArgs>
+      <InnerBuildArgs>$(InnerBuildArgs) /p:CoreSetupBlobRootUrl=$(SourceBuildReleaseDir)blobs/</InnerBuildArgs>
+      <InnerBuildArgs>$(InnerBuildArgs) /p:DotnetToolsetBlobRootUrl=$(SourceBuildReleaseDirUri)blobs/</InnerBuildArgs>
+      <InnerBuildArgs>$(InnerBuildArgs) /p:PB_PackageVersionPropsUrl=$(SourceBuildReleaseDirUri)PackageVersions.props</InnerBuildArgs>
+
+      <InnerBuildArgs>$(InnerBuildArgs) /p:DotNetPackageVersionPropsPath=$(SourceBuildArtifactsDir)obj/x64/Release/PackageVersions.props</InnerBuildArgs>
+      <InnerBuildArgs>$(InnerBuildArgs) /p:DotNetRestoreSourcePropsPath=$(SourceBuildArtifactsDir)obj/x64/Release/RestoreSources.props</InnerBuildArgs>
     </PropertyGroup>
 
     <ItemGroup>
-      <InnerBuildEnv Include="DOTNET_TOOL_DIR=/work/.dotnet/" />
-      <InnerBuildEnv Include="DotNetToolPath=/work/.dotnet/" />
-      <InnerBuildEnv Include="DotNetTool=/work/.dotnet/dotnet" />
       <InnerBuildEnv Include="DotNetBuildFromSource=true" />
-      <InnerBuildEnv Include="DotNetRestorePackagesPath=/work/.nuget/packages/" />
-      <InnerBuildEnv Include="DotNetCoreSdkDir=/work/.dotnet/" />
-      <InnerBuildEnv Include="DotNetBuildToolsDir=/work/eng/source-build/Tools/source-built" />
-      <InnerBuildEnv Include="DotNetRoot=/work/.dotnet/" />
-      <InnerBuildEnv Include="DOTNET_PATH=/work/.dotnet/" />
-      <InnerBuildEnv Include="DOTNET_HOST_PATH=/work/.dotnet/dotnet" />
-      <InnerBuildEnv Include="_InitializeDotNetCli=/work/.dotnet/" />
-      <InnerBuildEnv Include="_DotNetInstallDir=/work/.dotnet/" />
-      <InnerBuildEnv Include="_InitializeToolset=/work/eng/source-build/Tools/source-built/Microsoft.DotNet.Arcade.Sdk/tools/Build.proj" />
-      <InnerBuildEnv Include="BuildToolsPackageDir=/work/eng/source-build/Tools/source-built" />
-      <InnerBuildEnv Include="StabilizePackageVersion=true" />
-      <InnerBuildEnv Include="PB_IsStable=true" />
-      <InnerBuildEnv Include="IsStableBuild=true" />
-      <InnerBuildEnv Include="DotNetFinalVersionKind=release" />
-      <InnerBuildEnv Include="DropSuffix=true" />
-      <InnerBuildEnv Include="DotNetUseShippingVersions=true" />
       <InnerBuildEnv Include="ContinuousIntegrationBuild=true" />
       <InnerBuildEnv Include="MSBUILDDISABLENODEREUSE=1" />
-      <InnerBuildEnv Include="OfficialBuildId=20200130.8" />
-      <InnerBuildEnv Include="BUILD_BUILDNUMBER=20200130.8" />
-      <InnerBuildEnv Include="GitCommitCount=14873" />
-      <InnerBuildEnv Include="GitCommitHash=573d158fea168b51e0f9e628d08c9d3ca8a40ef8" />
-      <InnerBuildEnv Include="GitInfoCommitHash=573d158fea168b51e0f9e628d08c9d3ca8a40ef8" />
-      <InnerBuildEnv Include="SourceRevisionId=573d158fea168b51e0f9e628d08c9d3ca8a40ef8" />
-      <InnerBuildEnv Include="RepositoryCommit=573d158fea168b51e0f9e628d08c9d3ca8a40ef8" />
-      <InnerBuildEnv Include="COMMIT_SHA=573d158fea168b51e0f9e628d08c9d3ca8a40ef8" />
-      <InnerBuildEnv Include="GIT_COMMIT=573d158fea168b51e0f9e628d08c9d3ca8a40ef8" />
-      <InnerBuildEnv Include="PreReleaseVersionLabel=preview" />
-      <InnerBuildEnv Include="PackageVersionStamp=preview" />
-      <InnerBuildEnv Include="PB_VersionStamp=preview" />
-      <InnerBuildEnv Include="RepositoryType=Git" />
       <InnerBuildEnv Include="DeterministicSourcePaths=true" />
-      <InnerBuildEnv Include="SourceRoot=/work/" />
       <InnerBuildEnv Include="CLIBUILD_SKIP_TESTS=true" />
-      <InnerBuildEnv Include="ExternalRestoreSources=/work/artifacts/source-build/obj/x64/Release/blob-feed/packages/" />
       <InnerBuildEnv Include="CLIBUILD_SKIP_BUNDLEDDOTNETTOOLS=true" />
+
+      <InnerBuildEnv Include="DotNetRestorePackagesPath=$(SbPackageCacheDir)" />
+      <InnerBuildEnv Include="DotNetCoreSdkDir=$(SbDotNetCoreSdkDir)" />
+      <InnerBuildEnv Include="DotNetRoot=$(SbDotNetCoreSdkDir)" />
+      <InnerBuildEnv Include="DOTNET_PATH=$(SbDotNetCoreSdkDir)" />
+      <InnerBuildEnv Include="DOTNET_HOST_PATH=$(SbDotNetCoreSdkDir)dotnet" />
+      <InnerBuildEnv Include="_InitializeDotNetCli=$(SbDotNetCoreSdkDir)" />
+      <InnerBuildEnv Include="_DotNetInstallDir=$(SbDotNetCoreSdkDir)" />
+
       <InnerBuildEnv Include="SOURCE_BUILT_SDK_ID_ARCADE=Microsoft.DotNet.Arcade.Sdk" />
       <InnerBuildEnv Include="SOURCE_BUILT_SDK_VERSION_ARCADE=1.0.0-beta.19568.1" />
       <InnerBuildEnv Include="SOURCE_BUILT_SDK_DIR_ARCADE=/work/eng/source-build/Tools/source-built/Microsoft.DotNet.Arcade.Sdk/" />
+      <InnerBuildEnv Include="_InitializeToolset=/work/eng/source-build/Tools/source-built/Microsoft.DotNet.Arcade.Sdk/tools/Build.proj" />
     </ItemGroup>
   </Target>
 
