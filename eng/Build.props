@@ -5,7 +5,8 @@
   <Target Name="BuildUpstreamRepos"
           Condition="
             '$(FromSource)' == 'true' and
-            '$(InnerBuildFromSource)' != 'true'"
+            '$(InnerBuildFromSource)' != 'true' and
+            '$(BuildUpstreamRepos)' == 'true'"
           BeforeTargets="Execute">
     <ItemGroup>
       <RepositoryReference Include="aspnetcore" />
@@ -14,7 +15,7 @@
       <RepositoryReference Include="toolset" />
     </ItemGroup>
 
-    <!-- <MSBuild
+    <MSBuild
       Projects="$(RepoRoot)eng\source-build\build.proj"
       Targets="PrepareOutput;InitBuild"
       Properties="RepoRoot=$(RepoRoot)" />
@@ -22,7 +23,7 @@
     <MSBuild
       Projects="@(RepositoryReference -> '$(RepoRoot)eng\source-build\repos\%(Identity).proj')"
       Properties="RepoRoot=$(RepoRoot)"
-      StopOnFirstFailure="true" /> -->
+      StopOnFirstFailure="true" />
   </Target>
 
   <Target Name="ExecuteWithSourceBuiltTooling"
@@ -33,19 +34,12 @@
             '$(FromSource)' == 'true' and
             '$(InnerBuildFromSource)' != 'true'"
           BeforeTargets="Execute">
-    <MSBuild
-      Projects="$(RepoRoot)eng\source-build\repos\core-sdk.proj"
-      Properties="
-        RepoRoot=$(RepoRoot);
-        SkipRepoReferences=true"
-      StopOnFirstFailure="true" />
-
     <PropertyGroup>
       <PreventPrebuiltBuild>true</PreventPrebuiltBuild>
     </PropertyGroup>
 
     <!-- TODO: (source-build) Use a recursive build like below with additional lightweight args, not full proj. -->
-    <!-- <Exec Command="$(REPO_BUILD_TOOL_COMMAND) $(InnerBuildArgs)" /> -->
+    <Exec Command="$(REPO_BUILD_TOOL_COMMAND) $(InnerBuildArgs)" />
   </Target>
 
   <Target Name="PreventPrebuiltBuild"
