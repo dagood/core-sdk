@@ -72,12 +72,18 @@
       <TasksTargets Remove="@(TasksTargets)" />
       <TasksTargets Include="Restore;Build" />
     </ItemGroup>
+    <!--
+      __ToolInitPhase is simply to ensure MSBuild runs the targets separately, rerunning targets.
+      Otherwise, the effects of Restore may not affect the build, causing netstandard2.0 references
+      not to be injected, for example.
+    -->
     <MSBuild
       Projects="tasks\Microsoft.DotNet.SourceBuild.Tasks\Microsoft.DotNet.SourceBuild.Tasks.csproj"
       Targets="%(TasksTargets.Identity)"
       Properties="
         RestoreSources=$(OfflineSources);
-        OfflineBuild=$(OfflineBuild)" />
+        OfflineBuild=$(OfflineBuild);
+        __ToolInitPhase=%(TasksTargets.Identity)" />
   </Target>
 
   <Target Name="BuildXPlatTasks" DependsOnTargets="UnpackTarballs">
@@ -93,7 +99,8 @@
       Targets="%(TasksTargets.Identity)"
       Properties="
         RestoreSources=$(OfflineSources);
-        OfflineBuild=$(OfflineBuild)" />
+        OfflineBuild=$(OfflineBuild);
+        __ToolInitPhase=%(TasksTargets.Identity)" />
   </Target>
 
   <Target Name="GetRepoProjects">
