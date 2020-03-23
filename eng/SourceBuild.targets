@@ -6,7 +6,7 @@
       <PlatformArchRid>$(PlatformRid)-x64</PlatformArchRid>
       <PortableArchRid>linux-x64</PortableArchRid>
 
-      <SourceBuildArtifactsDir>$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'source-build'))</CurrentRepoSourceBuildArtifactsDir>
+      <SourceBuildArtifactsDir>$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'source-build'))</SourceBuildArtifactsDir>
       <CurrentRepoSourceBuildArtifactsDir>$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'source-build', 'core-sdk'))</CurrentRepoSourceBuildArtifactsDir>
 
       <SourceBuildReleaseDirUri>file://$(SourceBuildArtifactsDir)obj/x64/Release/</SourceBuildReleaseDirUri>
@@ -16,11 +16,10 @@
     </PropertyGroup>
 
     <PropertyGroup>
-      <InnerBuildArgs>$(InnerBuildArgs) -c Release</InnerBuildArgs>
-      <InnerBuildArgs>$(InnerBuildArgs) --nodereuse false</InnerBuildArgs>
-      <InnerBuildArgs>$(InnerBuildArgs) -v minimal</InnerBuildArgs>
-      <InnerBuildArgs>$(InnerBuildArgs) -bl</InnerBuildArgs>
-      <InnerBuildArgs>$(InnerBuildArgs) -ci</InnerBuildArgs>
+      <InnerBuildArgs>$(InnerBuildArgs) /p:Configuation=Release</InnerBuildArgs>
+      <InnerBuildArgs>$(InnerBuildArgs) /nr:false</InnerBuildArgs>
+      <InnerBuildArgs>$(InnerBuildArgs) /v:minimal</InnerBuildArgs>
+      <InnerBuildArgs>$(InnerBuildArgs) /bl:$(CurrentRepoSourceBuildArtifactsDir)msbuild.binlog</InnerBuildArgs>
 
       <InnerBuildArgs>$(InnerBuildArgs) /p:SkipBuildingInstallers=true</InnerBuildArgs>
       <InnerBuildArgs>$(InnerBuildArgs) /p:IncludeNuGetPackageArchive=false</InnerBuildArgs>
@@ -35,7 +34,7 @@
       <InnerBuildArgs>$(InnerBuildArgs) /p:CoreSetupRid=$(PlatformArchRid)</InnerBuildArgs>
 
       <InnerBuildArgs>$(InnerBuildArgs) /p:ArtifactsDir=$(CurrentRepoSourceBuildArtifactsDir)</InnerBuildArgs>
-      <InnerBuildArgs>$(InnerBuildArgs) /p:CoreSetupBlobRootUrl=$(SourceBuildReleaseDir)blobs/</InnerBuildArgs>
+      <InnerBuildArgs>$(InnerBuildArgs) /p:CoreSetupBlobRootUrl=$(SourceBuildReleaseDirUri)blobs/</InnerBuildArgs>
       <InnerBuildArgs>$(InnerBuildArgs) /p:DotnetToolsetBlobRootUrl=$(SourceBuildReleaseDirUri)blobs/</InnerBuildArgs>
       <InnerBuildArgs>$(InnerBuildArgs) /p:PB_PackageVersionPropsUrl=$(SourceBuildReleaseDirUri)PackageVersions.props</InnerBuildArgs>
 

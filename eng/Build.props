@@ -36,10 +36,15 @@
           BeforeTargets="Execute">
     <PropertyGroup>
       <PreventPrebuiltBuild>true</PreventPrebuiltBuild>
+      <InnerBuildArgs>$(InnerBuildArgs) /p:InnerBuildFromSource=true</InnerBuildArgs>
     </PropertyGroup>
 
     <!-- TODO: (source-build) Use a recursive build like below with additional lightweight args, not full proj. -->
-    <Exec Command="$(REPO_BUILD_TOOL_COMMAND) $(InnerBuildArgs)" />
+    <Exec
+      Command="$(REPO_BUILD_TOOL_COMMAND) $(InnerBuildArgs)"
+      WorkingDirectory="$(ProjectDirectory)"
+      EnvironmentVariables="@(InnerBuildEnv)"
+      IgnoreStandardErrorWarningFormat="true" />
   </Target>
 
   <Target Name="PreventPrebuiltBuild"
