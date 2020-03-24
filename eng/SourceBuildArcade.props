@@ -2,6 +2,20 @@
 
   <!-- Adapted from dotnet/source-build. -->
 
+  <!-- .../dir.props -->
+
+  <PropertyGroup>
+    <BaseOutputPath>$(SourceBuildArtifactsDir)</BaseOutputPath>
+    <BaseIntermediatePath>$(BaseOutputPath)obj/</BaseIntermediatePath>
+    <IntermediatePath>$(BaseIntermediatePath)$(Platform)/$(Configuration)/</IntermediatePath>
+
+    <PackageVersionPropsPath>$(IntermediatePath)PackageVersions.props</PackageVersionPropsPath>
+    <GennedPackageVersionPropsPath Condition="'$(OfflineBuild)' == 'true'">$(IntermediatePath)GennedPackageVersions.props</GennedPackageVersionPropsPath>
+    <GennedPackageVersionPropsPath Condition="'$(OfflineBuild)' != 'true'">$(IntermediatePath)PackageVersions.props</GennedPackageVersionPropsPath>
+  </PropertyGroup>
+
+  <!-- .../repos/dir.props -->
+
   <Import Project="$(OutputGitInfoPropsFile)" Condition="Exists('$(OutputGitInfoPropsFile)')" />
   <Import Project="$(OfflineGitInfoPropsFile)" Condition="Exists('$(OfflineGitInfoPropsFile)')" />
 
