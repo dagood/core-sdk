@@ -49,8 +49,7 @@
   <Target Name="ExecuteWithSourceBuiltTooling"
           DependsOnTargets="
             BuildUpstreamRepos;
-            GetSourceBuildCommandConfiguration;
-            PrepareSourceBuild"
+            GetSourceBuildCommandConfiguration"
           Condition="
             '$(FromSource)' == 'true' and
             '$(InnerBuildFromSource)' != 'true'"
