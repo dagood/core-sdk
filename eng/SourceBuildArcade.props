@@ -1,0 +1,93 @@
+<Project>
+
+  <!-- Adapted from dotnet/source-build. -->
+
+  <Import Project="$(OutputGitInfoPropsFile)" Condition="Exists('$(OutputGitInfoPropsFile)')" />
+  <Import Project="$(OfflineGitInfoPropsFile)" Condition="Exists('$(OfflineGitInfoPropsFile)')" />
+
+  <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+    <FlagParameterPrefix>-</FlagParameterPrefix>
+    <ArcadeFalseBoolBuildArg>0</ArcadeFalseBoolBuildArg>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
+    <FlagParameterPrefix>--</FlagParameterPrefix>
+    <ArcadeFalseBoolBuildArg>false</ArcadeFalseBoolBuildArg>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InnerBuildEnv Include="DotNetBuildFromSource=true" />
+    <InnerBuildEnv Include="DotNetRestorePackagesPath=$(PackagesDir)" />
+    <InnerBuildEnv Include="DotNetBuildOffline=true" Condition="'$(OfflineBuild)' == 'true'" />
+    <InnerBuildEnv Include="AddDotnetfeedProjectSource=false" Condition="'$(OfflineBuild)' == 'true'" />
+    <InnerBuildEnv Include="DotNetCoreSdkDir=$(DotNetCliToolDir)" />
+    <!-- DotNetRoot is used by Arcade vs DotNetCoreSdkDir for BuildTools -->
+    <InnerBuildEnv Include="DotNetRoot=$(DotNetCliToolDir)" />
+    <InnerBuildEnv Include="DOTNET_PATH=$(DotNetCliToolDir)" />
+    <InnerBuildEnv Include="DOTNET_HOST_PATH=$(DotNetCliToolDir)dotnet" />
+    <!-- _InitializeDotNetCli is used by websdk and templating to decide whether to init the SDK -->
+    <InnerBuildEnv Include="_InitializeDotNetCli=$(DotNetCliToolDir)" />
+    <InnerBuildEnv Include="_DotNetInstallDir=$(DotNetCliToolDir)" />
+    <InnerBuildEnv Include="_InitializeToolset=$(SourceBuildEngineeringDir)Tools/source-built/Microsoft.DotNet.Arcade.Sdk/tools/Build.proj" Condition="'$(UseBootstrapArcade)' != 'true'" />
+    <InnerBuildEnv Include="BuildToolsPackageDir=$(ToolsDir)" Condition="'$(RepositoryName)' == 'arcade'" />
+    <InnerBuildEnv Include="BuildToolsPackageDir=$(ToolsDir)source-built" Condition="'$(RepositoryName)' != 'arcade'" />
+
+    <InnerBuildEnv Include="ContinuousIntegrationBuild=true" />
+
+    <!-- Turn off node reuse for source build because repos use conflicting versions 
+         of compilers which cause assembly load errors.  
+         See https://github.com/dotnet/source-build/issues/541 -->
+    <InnerBuildEnv Include="MSBUILDDISABLENODEREUSE=1" />
+
+    <!-- some repos do this in a separate process -->
+    <InnerBuildEnv Include="OfficialBuildId=$(OfficialBuildId)" />
+    <InnerBuildEnv Include="BUILD_BUILDNUMBER=$(OfficialBuildId)" />
+    <InnerBuildEnv Include="GitCommitCount=$(GitCommitCount)" />
+    <InnerBuildEnv Include="GitCommitHash=$(GitCommitHash)" Condition="'$(GitCommitHash)' != ''" />
+    <InnerBuildEnv Include="GitInfoCommitHash=$(GitCommitHash)" Condition="'$(GitCommitHash)' != ''" />
+    <InnerBuildEnv Include="SourceRevisionId=$(GitCommitHash)" Condition="'$(GitCommitHash)' != ''" />
+    <InnerBuildEnv Include="RepositoryCommit=$(GitCommitHash)" Condition="'$(GitCommitHash)' != ''" />
+    <InnerBuildEnv Include="COMMIT_SHA=$(GitCommitHash)" Condition="'$(GitCommitHash)' != ''" />
+    <InnerBuildEnv Include="GIT_COMMIT=$(GitCommitHash)" Condition="'$(GitCommitHash)' != ''" />
+    <InnerBuildEnv Include="RepositoryType=Git" />
+    <InnerBuildEnv Include="DeterministicSourcePaths=true" Condition="'$(DeterministicBuildOptOut)' != 'true'" />
+    <InnerBuildEnv Include="DeterministicSourcePaths=false" Condition="'$(DeterministicBuildOptOut)' == 'true'" />
+    <InnerBuildEnv Include="SourceRoot=$(ProjectDirectory)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(EnableExtraDebugging)' == 'true'">
+    <!-- If MSBuild exits early, make sure debug output like 'MSBuild_*.failure.txt' ends up in a place we can see it. -->
+    <InnerBuildEnv Include="MSBUILDDEBUGPATH=$(MSBuildDebugPathTargetDir)" />
+    <InnerBuildEnv Include="MSBUILDDEBUGCOMM=1" />
+    <InnerBuildEnv Include="MSBUILDDEBUGSCHEDULER=1" />
+    <InnerBuildEnv Include="MSBUILDDEBUGFORCECACHING=1" />
+    <InnerBuildEnv Include="MSBUILDDEBUG=1" />
+    <InnerBuildEnv Include="MSBUILDDEBUGEVALUATION=1" />
+    <InnerBuildEnv Include="MSBUILDTARGETOUTPUTLOGGING=1" />
+    <InnerBuildEnv Include="MSBUILDLOGTASKINPUTS=1" />
+    <InnerBuildEnv Include="MSBUILDEMITSOLUTION=1" />
+    <InnerBuildEnv Include="MSBUILDLOGVERBOSERARSEARCHRESULTS=1" />
+
+    <!-- Output Roslyn logs to allow debugging compiler errors -->
+    <InnerBuildEnv Include="RoslynCommandLineLogFile=$(RoslynDebugPathTargetDir)" />
+
+    <!--ASP.NET dev server request logs -->
+    <InnerBuildEnv Include="RAZORBUILDSERVER_LOG=$(AspNetRazorBuildServerLogFile)" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <ArcadeBootstrapDir Condition="'$(OfflineBuild)' != 'true'">$(PackagesDir)</ArcadeBootstrapDir>
+    <ArcadeBootstrapDir Condition="'$(OfflineBuild)' == 'true'">$(ArcadeBootstrapPackageDir)</ArcadeBootstrapDir>
+    <ArcadeBootstrapVersion>$(ARCADE_BOOTSTRAP_VERSION)</ArcadeBootstrapVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ArcadeSdkOverride Include="Microsoft.DotNet.Arcade.Sdk" Group="ARCADE" Version="$(arcadeOutputPackageVersion)"/>
+    <ArcadeBootstrapSdkOverride Include="Microsoft.DotNet.Arcade.Sdk" Group="ARCADE" Version="$(ArcadeBootstrapVersion)" Location="$(ArcadeBootstrapDir)microsoft.dotnet.arcade.sdk/$(ArcadeBootstrapVersion)" />
+    <ArcadeConfigurationOverride Include="Microsoft.DotNet.Build.Tasks.Configuration" Group="ARCADE_CONFIGURATION" Version="$(arcadeOutputPackageVersion)"/>
+    <ArcadeCoreFxTestingOverride Include="Microsoft.DotNet.CoreFxTesting" Group="ARCADE_COREFX_TESTING" Version="$(arcadeOutputPackageVersion)"/>
+    <ArcadePackagingOverride Include="Microsoft.DotNet.Build.Tasks.Packaging" Group="ARCADE_PACKAGING" Version="$(arcadeOutputPackageVersion)"/>
+    <ILSdkOverride Include="Microsoft.NET.Sdk.IL" Group="IL" />
+    <MsBuildTraversalSdkOverride Include="Microsoft.Build.Traversal" Group="MSBUILD_TRAVERSAL" Version="2.0.2"/>
+  </ItemGroup>
+
+</Project>
