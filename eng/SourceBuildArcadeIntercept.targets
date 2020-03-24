@@ -1,0 +1,80 @@
+<Project>
+
+  <!-- TODO: Move this file (implementing source-build targets) to Arcade. -->
+
+  <!--
+    This file is separate because it's brand new (not adapted from dotnet/source-build) and specific
+    to injecting source-build into Arcade's build process.
+  -->
+
+  <PropertyGroup>
+    <SourceBuildEngineeringDir>$([MSBuild]::NormalizeDirectory('$(RepositoryEngineeringDir)', 'source-build'))</SourceBuildEngineeringDir>
+    <SourceBuildArtifactsDir>$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'source-build'))</SourceBuildArtifactsDir>
+    <CurrentRepoSourceBuildArtifactsDir>$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'source-build', 'repo'))</CurrentRepoSourceBuildArtifactsDir>
+
+    <ToolsLocalDir>$(SourceBuildEngineeringDir)tools-local/</ToolsLocalDir>
+    <TaskDir>$(ToolsLocalDir)tasks/</TaskDir>
+    <XPlatTasksBinDir>$(TaskDir)Microsoft.DotNet.SourceBuild.Tasks.XPlat/bin/$(Configuration)/netstandard2.0/</XPlatTasksBinDir>
+    <XPlatSourceBuildTasksAssembly>$(XPlatTasksBinDir)Microsoft.DotNet.SourceBuild.Tasks.XPlat.dll</XPlatSourceBuildTasksAssembly>
+
+    <LocalNuGetPackagesRoot>$([MSBuild]::NormalizeDirectory('$(CurrentRepoSourceBuildArtifactsDir)', '.packages'))</LocalNuGetPackagesRoot>
+
+    <DotNetCliToolDir>$([MSBuild]::NormalizeDirectory('$(CurrentRepoSourceBuildArtifactsDir)', '.dotnet'))</DotNetCliToolDir>
+  </PropertyGroup>
+
+  <Target Name="BuildUpstreamRepos"
+          Condition="
+            '$(FromSource)' == 'true' and
+            '$(InnerBuildFromSource)' != 'true' and
+            '$(BuildUpstreamRepos)' == 'true'"
+          BeforeTargets="Execute">
+    <ItemGroup>
+      <RepositoryReference Include="aspnetcore" />
+      <RepositoryReference Include="newtonsoft-json" />
+      <RepositoryReference Include="newtonsoft-json901" />
+      <RepositoryReference Include="toolset" />
+    </ItemGroup>
+
+    <MSBuild
+      Projects="$(RepoRoot)eng\source-build\build.proj"
+      Targets="PrepareOutput;InitBuild"
+      Properties="RepoRoot=$(RepoRoot)" />
+
+    <MSBuild
+      Projects="@(RepositoryReference -> '$(RepoRoot)eng\source-build\repos\%(Identity).proj')"
+      Properties="RepoRoot=$(RepoRoot)"
+      StopOnFirstFailure="true" />
+  </Target>
+
+  <Target Name="ExecuteWithSourceBuiltTooling"
+          DependsOnTargets="
+            BuildUpstreamRepos;
+            GetSourceBuildCommandConfiguration;
+            PrepareSourceBuild"
+          Condition="
+            '$(FromSource)' == 'true' and
+            '$(InnerBuildFromSource)' != 'true'"
+          BeforeTargets="Execute">
+    <PropertyGroup>
+      <PreventPrebuiltBuild>true</PreventPrebuiltBuild>
+      <InnerBuildArgs>$(InnerBuildArgs) /p:InnerBuildFromSource=true</InnerBuildArgs>
+    </PropertyGroup>
+
+    <Exec
+      Command="$(REPO_BUILD_TOOL_COMMAND) $(InnerBuildArgs)"
+      WorkingDirectory="$(ProjectDirectory)"
+      EnvironmentVariables="@(InnerBuildEnv)"
+      IgnoreStandardErrorWarningFormat="true" />
+  </Target>
+
+  <Target Name="PreventPrebuiltBuild"
+          DependsOnTargets="ExecuteWithSourceBuiltTooling"
+          Condition="'$(PreventPrebuiltBuild)' == 'true'"
+          BeforeTargets="Execute">
+    <ItemGroup>
+      <ProjectToBuild Remove="@(ProjectToBuild)" />
+      <ProjectToBuild Include="$(MSBuildThisFileDirectory)No.proj" />
+    </ItemGroup>
+  </Target>
+
+</Project>
