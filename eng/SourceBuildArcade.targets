@@ -37,7 +37,7 @@
     <OutputPlacementRepoApiImplemented Condition="'$(OutputPlacementRepoApiImplemented)' == ''">$(RepoApiImplemented)</OutputPlacementRepoApiImplemented>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(SourceOverrideRepoApiImplemented)' != 'true'">
+  <PropertyGroup>
     <NuGetConfigFile Condition="'$(NuGetConfigFile)' == '' and Exists('$(RepoRoot)NuGet.config')">$(RepoRoot)NuGet.config</NuGetConfigFile>
     <NuGetConfigFile Condition="'$(NuGetConfigFile)' == '' and Exists('$(RepoRoot)NuGet.Config')">$(RepoRoot)NuGet.Config</NuGetConfigFile>
     <NuGetConfigFile Condition="'$(NuGetConfigFile)' == '' and Exists('$(RepoRoot)src\NuGet.config')">$(RepoRoot)src\NuGet.config</NuGetConfigFile>
@@ -59,7 +59,7 @@
   </PropertyGroup>
 
   <Target Name="UpdateNuGetConfig"
-          BeforeTargets="ExecuteWithSourceBuiltTooling"
+          BeforeTargets="ExecuteInnerSourceBuild"
           Condition="'$(NuGetConfigFile)' != '' OR '@(NuGetConfigFiles)' != ''">
     <!-- Update the detected or manually specified NuGetConfigFile, but also allow multiple. -->
     <ItemGroup>
@@ -90,7 +90,7 @@
   </Target>
 
   <Target Name="UpdateGlobalJsonVersions"
-          BeforeTargets="ExecuteWithSourceBuiltTooling"
+          BeforeTargets="ExecuteInnerSourceBuild"
           Condition="'$(GlobalJsonFile)' != ''">
     <ItemGroup>
       <_PossibleCliVersionJsonPath Include="sdk.version" />
@@ -104,7 +104,7 @@
   </Target>
 
   <Target Name="CreateBuildOutputProps"
-          BeforeTargets="ExecuteWithSourceBuiltTooling">
+          BeforeTargets="ExecuteInnerSourceBuild">
     <PropertyGroup>
       <_PackageVersionPropsBackupPath>$(PackageVersionPropsPath).pre.$(RepositoryName).xml</_PackageVersionPropsBackupPath>
     </PropertyGroup>
@@ -137,7 +137,7 @@
     </ItemGroup>
 
     <GetSourceBuiltNupkgCacheConflicts SourceBuiltPackageInfos="@(_PreviouslySourceBuiltPackageInfos)"
-                                       PackageCacheDir="$(PackagesDir)"
+                                       PackageCacheDir="$(LocalNuGetPackagesRoot)"
                                        KnownOriginPackagePaths="@(_KnownOriginPackagePaths)">
       <Output TaskParameter="ConflictingPackageInfos" ItemName="ConflictingPackageInfos" />
     </GetSourceBuiltNupkgCacheConflicts>
@@ -167,7 +167,7 @@
   </Target>
 
   <Target Name="CreateCombinedRestoreSourceAndVersionProps"
-          BeforeTargets="ExecuteWithSourceBuiltTooling">
+          BeforeTargets="ExecuteInnerSourceBuild">
     <ItemGroup>
       <_DotNetRestoreSources Include="$(SourceBuiltPackagesPath)" />
       <_DotNetRestoreSources Include="$(ReferencePackagesDir)" Condition="'$(OfflineBuild)' == 'true'"/>
@@ -186,7 +186,7 @@
 
   <Target Name="CopyRepoGlobalJsonToPackageCacheForArcadeSdkLookup"
           Condition="'$(GlobalJsonFile)' != ''"
-          BeforeTargets="ExecuteWithSourceBuiltTooling">
+          BeforeTargets="ExecuteInnerSourceBuild">
     <Copy SourceFiles="$(GlobalJsonFile)" DestinationFolder="$(NUGET_PACKAGES)" />
   </Target>
 
@@ -220,8 +220,8 @@
          and then delete all expanded files and the nupkg from the package cache so the next time
          the package is used, it will reload the source-built version -->
     <ItemGroup>
-      <_FilesToCopy Include="$(PackagesDir)$([System.String]::copy('%(_BuiltPackageInfos.PackageId)').ToLower())/%(_BuiltPackageInfos.PackageVersion)/**/*.nupkg" />
-      <_FilesToDelete Include="$(PackagesDir)$([System.String]::copy('%(_BuiltPackageInfos.PackageId)').ToLower())/%(_BuiltPackageInfos.PackageVersion)/**/*.*" />
+      <_FilesToCopy Include="$(LocalNuGetPackagesRoot)$([System.String]::copy('%(_BuiltPackageInfos.PackageId)').ToLower())/%(_BuiltPackageInfos.PackageVersion)/**/*.nupkg" />
+      <_FilesToDelete Include="$(LocalNuGetPackagesRoot)$([System.String]::copy('%(_BuiltPackageInfos.PackageId)').ToLower())/%(_BuiltPackageInfos.PackageVersion)/**/*.*" />
     </ItemGroup>
     <Copy SourceFiles="@(_FilesToCopy)" DestinationFolder="$(PreviouslyRestoredPackagesPath)$(RepositoryName)/" />
     <Delete Files="@(_FilesToDelete)" />
@@ -237,7 +237,7 @@
 
   <Target Name="ExtractToolPackage"
           DependsOnTargets="GatherBuiltPackages"
-          AfterTargets="ExecuteWithSourceBuiltTooling"
+          AfterTargets="ExecuteInnerSourceBuild"
           Condition="'@(BuiltSdkPackageOverride)' != ''">
     <ItemGroup>
       <_ToolPackage
@@ -300,7 +300,7 @@
   </Target>
 
   <Target Name="SetSourceBuiltSdkOverrides"
-          BeforeTargets="ExecuteWithSourceBuiltTooling"
+          BeforeTargets="ExecuteInnerSourceBuild"
           Condition="'@(UseSourceBuiltSdkOverride)' != ''">
     <ItemGroup>
       <EnvironmentVariables Include="SOURCE_BUILT_SDK_ID_%(UseSourceBuiltSdkOverride.Group)=%(UseSourceBuiltSdkOverride.Identity)" />

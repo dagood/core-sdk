@@ -5,13 +5,23 @@
   <!-- .../dir.props -->
 
   <PropertyGroup>
+    <PlatformWithx64Default>$(Platform)</PlatformWithx64Default>
+    <!-- Assume AnyCPU is the Arcade default, and clear it to use our own default. -->
+    <PlatformWithx64Default Condition="'$(PlatformWithx64Default)' == 'AnyCPU'" />
+    <PlatformWithx64Default Condition="'$(PlatformWithx64Default)' == ''">x64</PlatformWithx64Default>
+
     <BaseOutputPath>$(SourceBuildArtifactsDir)</BaseOutputPath>
     <BaseIntermediatePath>$(BaseOutputPath)obj/</BaseIntermediatePath>
-    <IntermediatePath>$(BaseIntermediatePath)$(Platform)/$(Configuration)/</IntermediatePath>
+    <IntermediatePath>$(BaseIntermediatePath)$(PlatformWithx64Default)/$(Configuration)/</IntermediatePath>
 
+    <RestoreSourcePropsPath>$(IntermediatePath)RestoreSources.props</RestoreSourcePropsPath>
     <PackageVersionPropsPath>$(IntermediatePath)PackageVersions.props</PackageVersionPropsPath>
     <GennedPackageVersionPropsPath Condition="'$(OfflineBuild)' == 'true'">$(IntermediatePath)GennedPackageVersions.props</GennedPackageVersionPropsPath>
     <GennedPackageVersionPropsPath Condition="'$(OfflineBuild)' != 'true'">$(IntermediatePath)PackageVersions.props</GennedPackageVersionPropsPath>
+
+    <SourceBuiltBlobFeedDir>$(IntermediatePath)blob-feed/</SourceBuiltBlobFeedDir>
+    <SourceBuiltPackagesPath>$(SourceBuiltBlobFeedDir)packages/</SourceBuiltPackagesPath>
+    <SourceBuiltAssetsDir>$(SourceBuiltBlobFeedDir)assets/</SourceBuiltAssetsDir>
   </PropertyGroup>
 
   <!-- .../repos/dir.props -->
@@ -30,7 +40,7 @@
 
   <ItemGroup>
     <InnerBuildEnv Include="DotNetBuildFromSource=true" />
-    <InnerBuildEnv Include="DotNetRestorePackagesPath=$(PackagesDir)" />
+    <InnerBuildEnv Include="DotNetRestorePackagesPath=$(LocalNuGetPackagesRoot)" />
     <InnerBuildEnv Include="DotNetBuildOffline=true" Condition="'$(OfflineBuild)' == 'true'" />
     <InnerBuildEnv Include="AddDotnetfeedProjectSource=false" Condition="'$(OfflineBuild)' == 'true'" />
     <InnerBuildEnv Include="DotNetCoreSdkDir=$(DotNetCliToolDir)" />
@@ -89,7 +99,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <ArcadeBootstrapDir Condition="'$(OfflineBuild)' != 'true'">$(PackagesDir)</ArcadeBootstrapDir>
+    <ArcadeBootstrapDir Condition="'$(OfflineBuild)' != 'true'">$(LocalNuGetPackagesRoot)</ArcadeBootstrapDir>
     <ArcadeBootstrapDir Condition="'$(OfflineBuild)' == 'true'">$(ArcadeBootstrapPackageDir)</ArcadeBootstrapDir>
     <ArcadeBootstrapVersion>$(ARCADE_BOOTSTRAP_VERSION)</ArcadeBootstrapVersion>
   </PropertyGroup>

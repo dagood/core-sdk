@@ -49,11 +49,19 @@
   <Target Name="ExecuteWithSourceBuiltTooling"
           DependsOnTargets="
             BuildUpstreamRepos;
-            GetSourceBuildCommandConfiguration"
+            GetSourceBuildCommandConfiguration;
+            ExecuteInnerSourceBuild"
           Condition="
             '$(FromSource)' == 'true' and
             '$(InnerBuildFromSource)' != 'true'"
-          BeforeTargets="Execute">
+          BeforeTargets="Execute" />
+  
+  <!--
+    Separate target to execute to provide easy hook point for BeforeTargets that will only trigger
+    when the inner build is actually happening. Hooking BeforeTargets on
+    ExecuteWithSourceBuiltTooling runs unconditionally, for example, inside the core-sdk build.
+  -->
+  <Target Name="ExecuteInnerSourceBuild">
     <PropertyGroup>
       <PreventPrebuiltBuild>true</PreventPrebuiltBuild>
       <InnerBuildArgs>$(InnerBuildArgs) /p:InnerBuildFromSource=true</InnerBuildArgs>
