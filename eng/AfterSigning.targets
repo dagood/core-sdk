@@ -2,6 +2,13 @@
 
   <Target Name="RunProtoPack"
           BeforeTargets="AfterBuild">
+    <ItemGroup>
+      <SourceBuildIntermediatePackTarget Include="Restore;Pack" />
+    </ItemGroup>
+
+    <MSBuild
+      Projects="$(MSBuildThisFileDirectory)sb-int/SourceBuildIntermediate.csproj"
+      Targets="%(SourceBuildIntermediatePackTarget.Identity)" />
   </Target>
 
 </Project>

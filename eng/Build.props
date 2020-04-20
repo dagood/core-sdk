@@ -1,0 +1,10 @@
+<Project>
+
+  <ItemGroup>
+    <ProjectToBuild Remove="@(ProjectToBuild)" />
+    <ProjectToBuild Include="$(MSBuildThisFileFullPath)" />
+  </ItemGroup>
+
+  <Target Name="Build" />
+
+</Project>
