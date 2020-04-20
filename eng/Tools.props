@@ -1,0 +1,31 @@
+<Project>
+
+  <ItemGroup Condition="'$(FromSource)' == 'true'">
+    <PackageReference Include="@(SourceBuildCacheReference)" />
+  </ItemGroup>
+
+  <Target Name="AddSourceBuildCacheSource"
+          AfterTargets="Restore">
+    <PropertyGroup>
+      <CombinedSourceBuildCacheSource>$([MSBuild]::NormalizeDirectory('$(ArtifactsObjDir)', 'combined-sb-nupkgs'))</CombinedSourceBuildCacheSource>
+    </PropertyGroup>
+
+    <RemoveDir Directories="$(CombinedSourceBuildCacheSource)" />
+    <MakeDir Directories="$(CombinedSourceBuildCacheSource)" />
+
+    <ItemGroup>
+      <SourceBuildCacheReference
+        IdToLower="$([System.String]::new('%(Identity)').ToLowerInvariant())"
+        VersionToLower="$([System.String]::new('%(Version)').ToLowerInvariant())" />
+      <SourceBuildCacheReference
+        PackageCacheDir="$([MSBuild]::NormalizeDirectory('$(NuGetPackageRoot)', '%(IdToLower)', '%(VersionToLower)', 'artifacts'))" />
+
+      <CachedSourceBuildFile Include="%(SourceBuildCacheReference.PackageCacheDir)*" />
+    </ItemGroup>
+
+    <Exec Command="ln -s &quot;@(CachedSourceBuildFile)&quot; &quot;$(CombinedSourceBuildCacheSource)%(Filename)%(Extension)&quot;" />
+
+    <Message Text="Adding '$(CombinedSourceBuildCacheSource)' to sources before calling inner source build... (not really)" />
+  </Target>
+
+</Project>

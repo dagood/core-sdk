@@ -123,6 +123,12 @@
     <MicrosoftNETTestSdkVersion>15.8.0</MicrosoftNETTestSdkVersion>
   </PropertyGroup>
   <PropertyGroup>
+    <MicrosoftSourceBuilddotnetruntimelinuxx64>0.0.1-beta</MicrosoftSourceBuilddotnetruntimelinuxx64>
+  </PropertyGroup>
+  <ItemGroup>
+    <SourceBuildCacheReference Include="Microsoft.SourceBuild.dotnet-runtime.linux-x64" Version="$(MicrosoftSourceBuilddotnetruntimelinuxx64)" />
+  </ItemGroup>
+  <PropertyGroup>
     <!-- pinned dependency. This package is not being produced outside of the 2.0 branch of corefx and should not change. -->
     <CLI_NETStandardLibraryNETFrameworkVersion>2.0.1-servicing-26011-01</CLI_NETStandardLibraryNETFrameworkVersion>
   </PropertyGroup>
