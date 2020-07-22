@@ -1,17 +1,17 @@
-From db569ff5469df26d6682c1b1b91ebbfdd052e643 Mon Sep 17 00:00:00 2001
+From 015643b33aae22a5fafcd107db64e6c5c30c012a Mon Sep 17 00:00:00 2001
 From: dseefeld <dseefeld@microsoft.com>
 Date: Thu, 31 Oct 2019 20:38:26 +0000
-Subject: [PATCH 03/16] Conditionally set PackAsToolShimRID
+Subject: [PATCH 1/7] Conditionally set PackAsToolShimRID
 
 ---
  Directory.Build.targets | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Directory.Build.targets b/Directory.Build.targets
-index 94595c4b88..dcb0a3e5fb 100644
+index f89af5200c..6a6f56a81f 100644
 --- a/Directory.Build.targets
 +++ b/Directory.Build.targets
-@@ -39,7 +39,7 @@
+@@ -50,7 +50,7 @@
      <SuppressDependenciesWhenPacking Condition="'$(SuppressDependenciesWhenPacking)' == '' AND '$(IsAnalyzersProject)' == 'true'">true</SuppressDependenciesWhenPacking>
    </PropertyGroup>
  
