@@ -17,6 +17,7 @@ function InitializeCustomSDKToolset {
   # Failures on this call will be ignored, as this is expected to fail on some
   # OSes.
   InstallDotNetSharedFramework "2.1.0"
+  InstallDotNetSharedFramework "3.0.0"
 }
 
 # Installs additional shared frameworks for testing purposes
