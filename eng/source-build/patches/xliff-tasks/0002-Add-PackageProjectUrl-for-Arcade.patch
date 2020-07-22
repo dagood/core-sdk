@@ -1,0 +1,26 @@
+From a2a7266075d3466c4f36703614bed882522c8f61 Mon Sep 17 00:00:00 2001
+From: Chris Rummel <crummel@microsoft.com>
+Date: Wed, 22 Jul 2020 17:15:50 -0500
+Subject: [PATCH 2/2] Add PackageProjectUrl for Arcade.
+
+---
+ src/Directory.Build.props | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/src/Directory.Build.props b/src/Directory.Build.props
+index 71df64d..84e4f51 100644
+--- a/src/Directory.Build.props
++++ b/src/Directory.Build.props
+@@ -19,4 +19,9 @@
+     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+   </PropertyGroup>
+ 
++  <PropertyGroup>
++    <RepositoryUrl>https://github.com/dotnet/xliff-tasks</RepositoryUrl>
++    <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
++  </PropertyGroup>
++
+ </Project>
+-- 
+2.18.0
+
