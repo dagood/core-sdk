@@ -33,7 +33,7 @@
     -->
     <SdkAssembly
       Include="$(SdkReferenceDir)NuGet.*.dll"
-      Exclude="$(SdkReferenceDir)NuGet.CommandLine.XPlat.dll" />
+      Exclude="$(SdkReferenceDir)NuGet.CommandLine.XPlat.dll;$(SdkReferenceDir)NuGet.Build.Tasks.Console.dll;$(SdkReferenceDir)NuGet.Build.Tasks.dll" />
 
     <SdkAssemblyReference
       Include="@(SdkAssembly -> '%(FileName)')"

@@ -80,7 +80,7 @@
 
   <PropertyGroup>
     <!-- Init basic Arcade props, if the project importing this file doesn't use Arcade. -->
-    <ArtifactsDir Condition="'$(ArtifactsDir)' == ''">$(ProjectDir)artifacts/</ArtifactsDir>
+    <ArtifactsDir Condition="'$(ArtifactsDir)' == ''">$(ProjectDir)../../artifacts/</ArtifactsDir>
     <RepositoryEngineeringDir Condition="'$(RepositoryEngineeringDir)' == ''">$(ProjectDir)eng/</RepositoryEngineeringDir>
   </PropertyGroup>
 

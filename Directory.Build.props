@@ -5,6 +5,7 @@
   <PropertyGroup Condition="'$(CopyrightNetFoundation)' != ''">
     <Copyright>$(CopyrightNetFoundation)</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <_SuppressSdkImports>false</_SuppressSdkImports>
   </PropertyGroup>
 
   <PropertyGroup>
