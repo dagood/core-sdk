@@ -1,7 +1,7 @@
-From 84824077583e5afdc30028a5d4d6bc87a95b2594 Mon Sep 17 00:00:00 2001
+From 92866253f594d090bdfeacf68344265c5bbf0426 Mon Sep 17 00:00:00 2001
 From: dseefeld <dseefeld@microsoft.com>
 Date: Mon, 20 Apr 2020 15:09:58 +0000
-Subject: [PATCH 10/15] Remove import of PackageVersionProps from
+Subject: [PATCH 7/9] Remove import of PackageVersionProps from
  eng/Vervsions.props It should be imported by Arcade SDK
 
 ---
@@ -9,16 +9,16 @@ Subject: [PATCH 10/15] Remove import of PackageVersionProps from
  1 file changed, 2 deletions(-)
 
 diff --git a/eng/Versions.props b/eng/Versions.props
-index 0bf1b1b7daa..eb866a69686 100644
+index 51b09a0a719..0096e67c006 100644
 --- a/eng/Versions.props
 +++ b/eng/Versions.props
-@@ -148,6 +148,4 @@
-     <MicrosoftNETCoreRuntimeCoreCLRPackage>Microsoft.NETCore.Runtime.CoreCLR</MicrosoftNETCoreRuntimeCoreCLRPackage>
-     <MicrosoftTargetingPackPrivateWinRTPackage>Microsoft.TargetingPack.Private.WinRT</MicrosoftTargetingPackPrivateWinRTPackage>
+@@ -144,6 +144,4 @@
+     -->
+     <XmlDocFileRoot>$([MSBuild]::NormalizeDirectory('$(NuGetPackageRoot)', '$(MicrosoftPrivateIntellisensePackage)', '$(MicrosoftPrivateIntellisenseVersion)', 'IntellisenseFiles', 'net'))</XmlDocFileRoot>
    </PropertyGroup>
 -  <!-- Override isolated build dependency versions with versions from Repo API. -->
 -  <Import Project="$(DotNetPackageVersionPropsPath)" Condition="'$(DotNetPackageVersionPropsPath)' != ''" />
  </Project>
 -- 
-2.17.1
+2.18.0
 

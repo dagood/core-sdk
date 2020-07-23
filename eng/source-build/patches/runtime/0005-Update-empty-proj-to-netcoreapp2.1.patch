@@ -1,14 +1,14 @@
-From 7c720220e118056b040bb788a57575ed8632362c Mon Sep 17 00:00:00 2001
+From 08e30da8df00110f3bcfab3842b788bd3a52650b Mon Sep 17 00:00:00 2001
 From: dseefeld <dseefeld@microsoft.com>
 Date: Tue, 4 Feb 2020 17:34:09 +0000
-Subject: [PATCH 06/15] Update empty proj to netcoreapp2.1
+Subject: [PATCH 5/9] Update empty proj to netcoreapp2.1
 
 ---
  eng/empty.csproj | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/eng/empty.csproj b/eng/empty.csproj
-index 0bd280da02f..11e8929e536 100644
+index 6edde5507fc..b828dfb8225 100644
 --- a/eng/empty.csproj
 +++ b/eng/empty.csproj
 @@ -9,7 +9,7 @@
@@ -19,7 +19,7 @@ index 0bd280da02f..11e8929e536 100644
 +    <TargetFramework>netcoreapp2.1</TargetFramework>
    </PropertyGroup>
  
- </Project>
+   <Import Project="versioning.targets" />
 -- 
-2.17.1
+2.18.0
 

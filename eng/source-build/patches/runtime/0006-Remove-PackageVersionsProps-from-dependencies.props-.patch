@@ -1,7 +1,7 @@
-From 351d82f30986707d1052a75823f008b95dfc8d4e Mon Sep 17 00:00:00 2001
+From f9fcdc4365120d8a4d929989568d0a0a7fec5cd8 Mon Sep 17 00:00:00 2001
 From: dseefeld <dseefeld@microsoft.com>
 Date: Mon, 20 Apr 2020 14:46:43 +0000
-Subject: [PATCH 09/15] Remove PackageVersionsProps from dependencies.props It
+Subject: [PATCH 6/9] Remove PackageVersionsProps from dependencies.props It
  should be included with eng/Versions.props instead
 
 ---
@@ -22,5 +22,5 @@ index dcc5c07ccf5..e816ee9545b 100644
 -
  </Project>
 -- 
-2.17.1
+2.18.0
 
