@@ -70,6 +70,7 @@
     </PropertyGroup>
 
     <Exec
+      Condition="'$(ExecuteInnerSourceBuild)' != 'false'"
       Command="$(REPO_BUILD_TOOL_COMMAND) $(InnerBuildArgs)"
       WorkingDirectory="$(ProjectDirectory)"
       EnvironmentVariables="@(InnerBuildEnv)"
