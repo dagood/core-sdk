@@ -34,6 +34,8 @@
       <TarballSourceDir>$([MSBuild]::NormalizeDirectory('$(TarballRootDir)', 'src'))</TarballSourceDir>
       <TarballPrebuiltPackageDir>$([MSBuild]::NormalizeDirectory('$(TarballRootDir)', 'packages', 'prebuilt'))</TarballPrebuiltPackageDir>
     </PropertyGroup>
+
+    <MakeDir Directories="$(TarballRootDir)" />
   </Target>
 
   <Target Name="AddTarballSource"
