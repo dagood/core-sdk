@@ -19,7 +19,7 @@
 
     <LocalNuGetPackagesRoot>$([MSBuild]::NormalizeDirectory('$(CurrentRepoSourceBuildArtifactsDir)', '.packages'))</LocalNuGetPackagesRoot>
 
-    <DotNetCliToolDir>$([MSBuild]::NormalizeDirectory('$(CurrentRepoSourceBuildArtifactsDir)', '.dotnet'))</DotNetCliToolDir>
+    <DotNetCliToolDir>$([MSBuild]::NormalizeDirectory('$(DotNetRoot)'))</DotNetCliToolDir>
   </PropertyGroup>
 
   <Target Name="BuildUpstreamRepos"
