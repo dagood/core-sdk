@@ -104,7 +104,7 @@
           BeforeTargets="Execute">
     <ItemGroup>
       <ProjectToBuild Remove="@(ProjectToBuild)" />
-      <ProjectToBuild Include="$(MSBuildThisFileDirectory)No.proj" />
+      <ProjectToBuild Include="$(MSBuildThisFileDirectory)Noop.proj" />
     </ItemGroup>
   </Target>
 
