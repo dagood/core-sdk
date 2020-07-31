@@ -1,6 +1,7 @@
 <Project>
   <Import Project="SourceBuildArcadeIntercept.targets" />
   <Import Project="SourceBuildArcade.props" />
+  <Import Project="Microsoft.DotNet.Arcade.Sdk/tools/SourceBuild.Tarball.targets" />
 
   <Import Project="$([MSBuild]::NormalizePath('$(RepositoryEngineeringDir)', 'SourceBuild.targets'))" />
 
