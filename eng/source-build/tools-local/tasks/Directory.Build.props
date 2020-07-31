@@ -7,7 +7,8 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <SdkReferenceDir Condition="'$(SDK_VERSION)' != ''">$(DotNetCliToolDir)sdk/$(SDK_VERSION)/</SdkReferenceDir>
+    <SdkReferenceDir Condition="'$(SdkReferenceDir)' == '' and '$(MSBuildToolsPath)' != ''">$([MSBuild]::NormalizeDirectory('$(MSBuildToolsPath)'))</SdkReferenceDir>
+    <SdkReferenceDir Condition="'$(SdkReferenceDir)' == '' and '$(SDK_VERSION)' != ''">$(DotNetCliToolDir)sdk/$(SDK_VERSION)/</SdkReferenceDir>
   </PropertyGroup>
 
   <!--
