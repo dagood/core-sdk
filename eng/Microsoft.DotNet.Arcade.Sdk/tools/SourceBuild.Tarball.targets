@@ -16,8 +16,7 @@
             CopyTarballFiles;
             RemoveTarballKnownExtraPrebuilts;
             ForbidPrebuilts;
-            "
-          AfterTargets="Execute" />
+            " />
 
   <Import Project="SourceBuild.Tarball.KnownExtraPrebuilts.targets" />
 
@@ -27,6 +26,10 @@
 
   <Target Name="GetTarballDirProps">
     <PropertyGroup>
+      <!-- Allow specifying TarballRoot with reasonable default. -->
+      <TarballRoot Condition="'$(TarballRoot)' == ''">$([MSBuild]::NormalizeDirectory('$(ArtifactsBinDir)', 'source-build-tarball-root'))</TarballRoot>
+
+      <!-- Make sure tarball root is normalized. It's common to leave off trailing slash manually. -->
       <TarballRootDir>$([MSBuild]::NormalizeDirectory('$(TarballRoot)'))</TarballRootDir>
       <TarballSourceDir>$([MSBuild]::NormalizeDirectory('$(TarballRootDir)', 'src'))</TarballSourceDir>
       <TarballPrebuiltPackageDir>$([MSBuild]::NormalizeDirectory('$(TarballRootDir)', 'packages', 'prebuilt'))</TarballPrebuiltPackageDir>

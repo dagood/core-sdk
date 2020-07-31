@@ -52,7 +52,7 @@
             GetSourceBuildCommandConfiguration;
             ExecuteInnerSourceBuild;
             PackSourceBuildIntermediateNupkg;
-            "
+            PackSourceBuildTarball"
           Condition="
             '$(FromSource)' == 'true' and
             '$(InnerBuildFromSource)' != 'true'"
