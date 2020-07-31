@@ -18,6 +18,13 @@
             ForbidPrebuilts;
             " />
 
+  <!-- Get common props. Specifically to fix Darc init, but more might be brought in this way. -->
+  <PropertyGroup>
+    <SkipArcadeSdkImport>true</SkipArcadeSdkImport>
+  </PropertyGroup>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove(Directory.Build.props, $(MSBuildThisFileDirectory)))" />
+  <Import Project="$([MSBuild]::GetPathOfFileAbove(Directory.Build.targets, $(MSBuildThisFileDirectory)))" />
+
   <Import Project="SourceBuild.Tarball.KnownExtraPrebuilts.targets" />
 
   <Import
