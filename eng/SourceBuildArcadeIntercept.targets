@@ -46,6 +46,21 @@
       StopOnFirstFailure="true" />
   </Target>
 
+  <Target Name="DownloadTarballPackages">
+    <MSBuild
+      Projects="$(RepoRoot)eng\source-build\build.proj"
+      Targets="
+        DownloadSourceBuildReferencePackages;
+        DownloadSourceBuiltArtifacts" />
+  </Target>
+
+  <Target Name="RunCopyAndDisassembleReferenceOnlyPackages">
+    <MSBuild
+      Projects="$(RepoRoot)eng\source-build\build.proj"
+      Targets="CopyAndDisassembleReferenceOnlyPackages"
+      Properties="ArchiveDownloadedPackages=true" />
+  </Target>
+
   <Target Name="ExecuteWithSourceBuiltTooling"
           DependsOnTargets="
             BuildUpstreamRepos;

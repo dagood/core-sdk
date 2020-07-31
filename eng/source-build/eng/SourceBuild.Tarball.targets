@@ -182,7 +182,8 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="AddTarballPackages">
+  <Target Name="AddTarballPackages"
+          DependsOnTargets="DownloadTarballPackages">
     <!-- Find reference-packages to exclude from tarball prebuilts...-->
     <ItemGroup Condition="'$(CustomRefPackagesDir)' != ''">
       <SourceBuildReferencePackageFile Include="$([MSBuild]::NormalizeDirectory('$(CustomRefPackagesDir)'))**\*.nupkg" />
@@ -282,7 +283,9 @@
   </Target>
 
   <Target Name="AddTarballIlSrc"
-          DependsOnTargets="AddTarballPackages">
+          DependsOnTargets="
+            AddTarballPackages;
+            RunCopyAndDisassembleReferenceOnlyPackages">
     <ItemGroup>
       <!--
         The il directories are decomposed into id/version, so assemble package names to see what
