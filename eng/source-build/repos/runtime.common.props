@@ -33,6 +33,7 @@
     <CoreClrBuildArguments>$(CoreClrBuildArguments) /p:PackagesDir=$(PackagesDir)</CoreClrBuildArguments>
     <CoreClrBuildArguments>$(CoreClrBuildArguments) /p:ContinuousIntegrationBuild=true</CoreClrBuildArguments>
     <CoreClrBuildArguments>$(CoreClrBuildArguments) /p:PackageRid=$(OverrideTargetRid)</CoreClrBuildArguments>
+    <CoreClrBuildArguments>$(CoreClrBuildArguments) /p:NoPgoOptimize=true</CoreClrBuildArguments>
     <CoreClrBuildArguments Condition="'$(TargetOS)' != 'OSX'">$(CoreClrBuildArguments) /p:RuntimeOS=$(OverrideTargetRid.Substring(0, $(OverrideTargetRid.IndexOf("-"))))</CoreClrBuildArguments>
     <CoreClrBuildArguments Condition="'$(TargetOS)' == 'OSX'">$(CoreClrBuildArguments) /p:RuntimeOS=$(OverrideTargetRid)</CoreClrBuildArguments>
 
