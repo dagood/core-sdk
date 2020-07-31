@@ -50,7 +50,9 @@
           DependsOnTargets="
             BuildUpstreamRepos;
             GetSourceBuildCommandConfiguration;
-            ExecuteInnerSourceBuild"
+            ExecuteInnerSourceBuild;
+            PackSourceBuildIntermediateNupkg;
+            "
           Condition="
             '$(FromSource)' == 'true' and
             '$(InnerBuildFromSource)' != 'true'"
@@ -73,6 +75,12 @@
       EnvironmentVariables="@(InnerBuildEnv)"
       IgnoreStandardErrorWarningFormat="true" />
   </Target>
+
+  <!--
+    TODO: Combine with SBRP work. Included here to make merge conflict resolution in the
+    DependsOnTargets more obvious.
+  -->
+  <Target Name="PackSourceBuildIntermediateNupkg" />
 
   <Target Name="PreventPrebuiltBuild"
           DependsOnTargets="ExecuteWithSourceBuiltTooling"
