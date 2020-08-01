@@ -181,9 +181,9 @@
       <Sha>6f8eb3a2e1db6b458451b9cfd2a4f5557769b041</Sha>
       <RepoName>nuget-client</RepoName>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Logging" Version="3.1.2" CoherentParentDependency="Microsoft.AspNetCore.Mvc.Razor.Extensions">
+    <Dependency Name="Microsoft.Extensions.Logging" Version="5.0.0-preview.7.20365.19" CoherentParentDependency="Microsoft.AspNetCore.Mvc.Razor.Extensions">
       <Uri>https://github.com/dotnet/extensions</Uri>
-      <Sha>1286a6ff55e300352dabeb6d778c9fcdd258bd08</Sha>
+      <Sha>cc38b0d85cfd7d46bc89140a7cf2ce97fba74bad</Sha>
       <RepoName>aspnet-extensions</RepoName>
     </Dependency>
     <Dependency Name="Microsoft.NET.Sdk" Version="3.1.102-servicing.20068.5" CoherentParentDependency="Microsoft.Dotnet.Toolset.Internal">
