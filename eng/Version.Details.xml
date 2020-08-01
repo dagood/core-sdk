@@ -159,9 +159,9 @@
       <Sha>916b5cba268e1e1e803243004f4276cf40b2dda8</Sha>
       <RepoName>core-setup-portable</RepoName>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Mvc.Razor.Extensions" Version="3.1.2" CoherentParentDependency="Microsoft.AspNetCore.App.Ref">
+    <Dependency Name="Microsoft.AspNetCore.Mvc.Razor.Extensions" Version="5.0.0-preview.5.20278.2" CoherentParentDependency="Microsoft.AspNetCore.App.Ref">
       <Uri>https://github.com/dotnet/aspnetcore-tooling</Uri>
-      <Sha>2dab42e151ea8020a75cdaaa8c46bf5d9093b8c0</Sha>
+      <Sha>c13871ff871041d9b85895a58cd08b574f125a16</Sha>
       <RepoName>aspnetcore-tooling</RepoName>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Common.ItemTemplates" Version="3.1.2" CoherentParentDependency="Microsoft.Dotnet.Sdk.Internal">
