@@ -19,7 +19,7 @@
 
     <LocalNuGetPackagesRoot>$([MSBuild]::NormalizeDirectory('$(CurrentRepoSourceBuildArtifactsDir)', '.packages'))</LocalNuGetPackagesRoot>
 
-    <DotNetCliToolDir>$([MSBuild]::NormalizeDirectory('$(CurrentRepoSourceBuildArtifactsDir)', '.dotnet'))</DotNetCliToolDir>
+    <DotNetCliToolDir>$([MSBuild]::NormalizeDirectory('$(DotNetRoot)'))</DotNetCliToolDir>
   </PropertyGroup>
 
   <Target Name="BuildUpstreamRepos"
@@ -46,11 +46,28 @@
       StopOnFirstFailure="true" />
   </Target>
 
+  <Target Name="DownloadTarballPackages">
+    <MSBuild
+      Projects="$(RepoRoot)eng\source-build\build.proj"
+      Targets="
+        DownloadSourceBuildReferencePackages;
+        DownloadSourceBuiltArtifacts" />
+  </Target>
+
+  <Target Name="RunCopyAndDisassembleReferenceOnlyPackages">
+    <MSBuild
+      Projects="$(RepoRoot)eng\source-build\build.proj"
+      Targets="CopyAndDisassembleReferenceOnlyPackages"
+      Properties="ArchiveDownloadedPackages=true" />
+  </Target>
+
   <Target Name="ExecuteWithSourceBuiltTooling"
           DependsOnTargets="
             BuildUpstreamRepos;
             GetSourceBuildCommandConfiguration;
-            ExecuteInnerSourceBuild"
+            ExecuteInnerSourceBuild;
+            PackSourceBuildIntermediateNupkg;
+            PackSourceBuildTarball"
           Condition="
             '$(FromSource)' == 'true' and
             '$(InnerBuildFromSource)' != 'true'"
@@ -68,11 +85,18 @@
     </PropertyGroup>
 
     <Exec
+      Condition="'$(ExecuteInnerSourceBuild)' != 'false'"
       Command="$(REPO_BUILD_TOOL_COMMAND) $(InnerBuildArgs)"
       WorkingDirectory="$(ProjectDirectory)"
       EnvironmentVariables="@(InnerBuildEnv)"
       IgnoreStandardErrorWarningFormat="true" />
   </Target>
+
+  <!--
+    TODO: Combine with SBRP work. Included here to make merge conflict resolution in the
+    DependsOnTargets more obvious.
+  -->
+  <Target Name="PackSourceBuildIntermediateNupkg" />
 
   <Target Name="PreventPrebuiltBuild"
           DependsOnTargets="ExecuteWithSourceBuiltTooling"
