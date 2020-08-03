@@ -1,0 +1,81 @@
+From 52fd80af3d7ea5d59c029a099eae39232e115a46 Mon Sep 17 00:00:00 2001
+From: Chris Rummel <crummel@microsoft.com>
+Date: Sat, 1 Aug 2020 15:56:44 -0500
+Subject: [PATCH] Try building full fx in msbuild.
+
+---
+ eng/AfterSigning.targets         | 4 +++-
+ src/Build/Microsoft.Build.csproj | 2 +-
+ src/Directory.Build.props        | 4 ++--
+ src/MSBuild/MSBuild.csproj       | 2 +-
+ 4 files changed, 7 insertions(+), 5 deletions(-)
+
+diff --git a/eng/AfterSigning.targets b/eng/AfterSigning.targets
+index e699c81e..1e03e0be 100644
+--- a/eng/AfterSigning.targets
++++ b/eng/AfterSigning.targets
+@@ -3,10 +3,12 @@
+         <Copy 
+             SourceFiles="$(ArtifactsBinDir)MSBuild\x64\Release\net472\MSBuild.pdb"
+             DestinationFolder="$(ArtifactsSymStoreDirectory)\MSBuild\net472\amd64"
++            Condition="Exists('$(ArtifactsBinDir)MSBuild\x64\Release\net472\MSBuild.pdb')"
+             />
+         <Copy 
+             SourceFiles="$(ArtifactsBinDir)MSBuildTaskHost\x64\Release\net35\MSBuildTaskHost.pdb"
+             DestinationFolder="$(ArtifactsSymStoreDirectory)\MSBuildTaskHost\net35\amd64"
++            Condition="Exists('$(ArtifactsBinDir)MSBuildTaskHost\x64\Release\net35\MSBuildTaskHost.pdb')"
+             />
+     </Target>
+-</Project>
+\ No newline at end of file
++</Project>
+diff --git a/src/Build/Microsoft.Build.csproj b/src/Build/Microsoft.Build.csproj
+index c70ad9fc..58756134 100644
+--- a/src/Build/Microsoft.Build.csproj
++++ b/src/Build/Microsoft.Build.csproj
+@@ -7,7 +7,7 @@
+     <!-- Node reuse requires an API new to .NET Core 2.1 not yet available
+          in .NETStandard. -->
+     <TargetFrameworks>netcoreapp2.1</TargetFrameworks>
+-    <TargetFrameworks Condition="'$(OsEnvironment)'=='windows'">$(FullFrameworkTFM);netcoreapp2.1</TargetFrameworks>
++    <TargetFrameworks Condition="'$(OsEnvironment)'=='windows' or '$(DotNetBuildFromSource)' == 'true'">$(FullFrameworkTFM);netcoreapp2.1</TargetFrameworks>
+     <TargetFrameworks Condition="'$(MonoBuild)'=='true'">$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
+     <RootNamespace>Microsoft.Build</RootNamespace>
+     <AssemblyName>Microsoft.Build</AssemblyName>
+diff --git a/src/Directory.Build.props b/src/Directory.Build.props
+index 1dbbd8dc..cf341a4c 100644
+--- a/src/Directory.Build.props
++++ b/src/Directory.Build.props
+@@ -27,14 +27,14 @@
+     
+     <!-- Defaults for target frameworks and architecture -->
+     <LibraryTargetFrameworks>$(FullFrameworkTFM);netstandard2.0</LibraryTargetFrameworks>
+-    <LibraryTargetFrameworks Condition="'$(DotNetBuildFromSource)' == 'true'">netstandard2.0</LibraryTargetFrameworks>
+     <LibraryTargetFrameworks Condition="'$(MonoBuild)'=='true'">$(FullFrameworkTFM)</LibraryTargetFrameworks>
+     <PlatformTarget>AnyCPU</PlatformTarget>
+ 
+     <!-- Target frameworks for Exe and unit test projects (ie projects with runtime output) -->
+     <RuntimeOutputTargetFrameworks>netcoreapp2.1</RuntimeOutputTargetFrameworks>
+-    <RuntimeOutputTargetFrameworks Condition="'$(OsEnvironment)'=='windows' and '$(DotNetBuildFromSource)' != 'true'">$(FullFrameworkTFM);$(RuntimeOutputTargetFrameworks)</RuntimeOutputTargetFrameworks>
++    <RuntimeOutputTargetFrameworks Condition="'$(OsEnvironment)'=='windows'">$(FullFrameworkTFM);$(RuntimeOutputTargetFrameworks)</RuntimeOutputTargetFrameworks>
+     <RuntimeOutputTargetFrameworks Condition="'$(MonoBuild)' == 'true'">$(FullFrameworkTFM)</RuntimeOutputTargetFrameworks>
++    <RuntimeOutputTargetFrameworks Condition="'$(DotNetBuildFromSource)' == 'true'">$(FullFrameworkTFM);$(RuntimeOutputTargetFrameworks)</RuntimeOutputTargetFrameworks>
+ 
+     <!-- Don't automatically append target framework to output path, since we want to put the Platform Target beforehand, if it's not AnyCPU -->
+     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+diff --git a/src/MSBuild/MSBuild.csproj b/src/MSBuild/MSBuild.csproj
+index 75f5ca31..ba1e11a1 100644
+--- a/src/MSBuild/MSBuild.csproj
++++ b/src/MSBuild/MSBuild.csproj
+@@ -275,7 +275,7 @@
+ 
+     <ItemGroup>
+       <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\MSBuild.exe.config" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == '$(FullFrameworkTFM)' " />
+-      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Build.Framework.tlb" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == '$(FullFrameworkTFM)' " />
++      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Build.Framework.tlb" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == '$(FullFrameworkTFM)' and '$(DotNetBuildFromSource)' != 'true' " />
+       <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Data.Entity.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == '$(FullFrameworkTFM)' " />
+       <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.ServiceModel.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == '$(FullFrameworkTFM)' " />
+       <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.WinFx.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == '$(FullFrameworkTFM)' " />
+-- 
+2.18.0
+

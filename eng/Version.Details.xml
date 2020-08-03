@@ -172,9 +172,9 @@
       <Uri>https://github.com/dotnet/roslyn</Uri>
       <Sha>fb7b2e716d163b7abebf57db505e01a4a521ddae</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build" Version="16.4.0" CoherentParentDependency="Microsoft.Dotnet.Toolset.Internal">
+    <Dependency Name="Microsoft.Build" Version="16.7.0-preview-20220-01" CoherentParentDependency="Microsoft.Dotnet.Toolset.Internal">
       <Uri>https://github.com/microsoft/msbuild</Uri>
-      <Sha>e901037fe1815eae17424f860412d0b967d09461</Sha>
+      <Sha>80e487bff4b7adced47cab46b3481f1a5f2b3178</Sha>
     </Dependency>
     <Dependency Name="NuGet.Build.Tasks" Version="5.4.0-rtm.6292" CoherentParentDependency="Microsoft.Dotnet.Toolset.Internal">
       <Uri>https://github.com/NuGet/NuGet.Client</Uri>
