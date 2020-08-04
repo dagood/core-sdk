@@ -180,6 +180,14 @@
     </ItemGroup>
   </Target>
 
+  <Target Name="DownloadTarballPackages">
+    <MSBuild
+      Projects="$(SourceBuildEngineeringDir)build.proj"
+      Targets="
+        DownloadSourceBuildReferencePackages;
+        DownloadSourceBuiltArtifacts" />
+  </Target>
+
   <Target Name="AddTarballPackages"
           DependsOnTargets="DownloadTarballPackages">
     <!-- Find reference-packages to exclude from tarball prebuilts...-->
@@ -278,6 +286,13 @@
 
       <TarballCopyFile Include="@(ExternalTarballFile);" />
     </ItemGroup>
+  </Target>
+
+  <Target Name="RunCopyAndDisassembleReferenceOnlyPackages">
+    <MSBuild
+      Projects="$(SourceBuildEngineeringDir)build.proj"
+      Targets="CopyAndDisassembleReferenceOnlyPackages"
+      Properties="ArchiveDownloadedPackages=true" />
   </Target>
 
   <Target Name="AddTarballIlSrc"

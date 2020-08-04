@@ -3,63 +3,35 @@
   <!-- TODO: Move this file (implementing source-build targets) to Arcade. -->
 
   <!--
-    This file is separate because it's brand new (not adapted from dotnet/source-build) and specific
-    to injecting source-build into Arcade's build process.
+    These targets inject source-build into Arcade's build process.
   -->
 
   <PropertyGroup>
+    <SourceBuildOutputDir>$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'source-build'))</SourceBuildOutputDir>
+    <SourceBuildSelfDir>$([MSBuild]::NormalizeDirectory('$(SourceBuildOutputDir)', 'self'))</SourceBuildSelfDir>
+    <CurrentRepoSourceBuildArtifactsDir>$([MSBuild]::NormalizeDirectory('$(SourceBuildSelfDir)', 'artifacts'))</CurrentRepoSourceBuildArtifactsDir>
+    <CurrentRepoSourceBuildSourceDir>$([MSBuild]::NormalizeDirectory('$(SourceBuildSelfDir)', 'src'))</CurrentRepoSourceBuildSourceDir>
+    <CurrentRepoSourceBuildPackageCache>$([MSBuild]::NormalizeDirectory('$(SourceBuildSelfDir)', 'package-cache'))</CurrentRepoSourceBuildPackageCache>
+
+    <CurrentRepoSourceBuildArtifactsPackagesDir>$([MSBuild]::NormalizeDirectory('$(CurrentRepoSourceBuildArtifactsDir)', 'packages', '$(Configuration)'))</CurrentRepoSourceBuildArtifactsPackagesDir>
+    <CurrentRepoSourceBuildBinlogFile>$([MSBuild]::NormalizePath('$(CurrentRepoSourceBuildArtifactsDir)', 'sourcebuild.binlog'))</CurrentRepoSourceBuildBinlogFile>
+
+    <InnerSourceBuildRepoRoot Condition="'$(InnerSourceBuildRepoRoot)' == ''">$(CurrentRepoSourceBuildSourceDir)</InnerSourceBuildRepoRoot>
+
+    <CleanInnerSourceBuildRepoRoot Condition="'$(CleanInnerSourceBuildRepoRoot)' == ''">true</CleanInnerSourceBuildRepoRoot>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <SourceBuildEngineeringDir>$([MSBuild]::NormalizeDirectory('$(RepositoryEngineeringDir)', 'source-build'))</SourceBuildEngineeringDir>
-    <SourceBuildArtifactsDir>$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'source-build'))</SourceBuildArtifactsDir>
-    <CurrentRepoSourceBuildArtifactsDir>$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'source-build', 'repo'))</CurrentRepoSourceBuildArtifactsDir>
+    <LocalNuGetPackagesRoot>$(CurrentRepoSourceBuildPackageCache)</LocalNuGetPackagesRoot>
 
     <ToolsLocalDir>$(SourceBuildEngineeringDir)tools-local/</ToolsLocalDir>
     <TaskDir>$(ToolsLocalDir)tasks/</TaskDir>
     <XPlatTasksBinDir>$(TaskDir)Microsoft.DotNet.SourceBuild.Tasks.XPlat/bin/$(Configuration)/netstandard2.0/</XPlatTasksBinDir>
     <XPlatSourceBuildTasksAssembly>$(XPlatTasksBinDir)Microsoft.DotNet.SourceBuild.Tasks.XPlat.dll</XPlatSourceBuildTasksAssembly>
 
-    <LocalNuGetPackagesRoot>$([MSBuild]::NormalizeDirectory('$(CurrentRepoSourceBuildArtifactsDir)', '.packages'))</LocalNuGetPackagesRoot>
-
     <DotNetCliToolDir>$([MSBuild]::NormalizeDirectory('$(DotNetRoot)'))</DotNetCliToolDir>
   </PropertyGroup>
-
-  <Target Name="BuildUpstreamRepos"
-          Condition="
-            '$(FromSource)' == 'true' and
-            '$(InnerBuildFromSource)' != 'true' and
-            '$(BuildUpstreamRepos)' == 'true'"
-          BeforeTargets="Execute">
-    <ItemGroup>
-      <RepositoryReference Include="aspnetcore" />
-      <RepositoryReference Include="newtonsoft-json" />
-      <RepositoryReference Include="newtonsoft-json901" />
-      <RepositoryReference Include="toolset" />
-    </ItemGroup>
-
-    <MSBuild
-      Projects="$(RepoRoot)eng\source-build\build.proj"
-      Targets="PrepareOutput;InitBuild"
-      Properties="RepoRoot=$(RepoRoot)" />
-
-    <MSBuild
-      Projects="@(RepositoryReference -> '$(RepoRoot)eng\source-build\repos\%(Identity).proj')"
-      Properties="RepoRoot=$(RepoRoot)"
-      StopOnFirstFailure="true" />
-  </Target>
-
-  <Target Name="DownloadTarballPackages">
-    <MSBuild
-      Projects="$(RepoRoot)eng\source-build\build.proj"
-      Targets="
-        DownloadSourceBuildReferencePackages;
-        DownloadSourceBuiltArtifacts" />
-  </Target>
-
-  <Target Name="RunCopyAndDisassembleReferenceOnlyPackages">
-    <MSBuild
-      Projects="$(RepoRoot)eng\source-build\build.proj"
-      Targets="CopyAndDisassembleReferenceOnlyPackages"
-      Properties="ArchiveDownloadedPackages=true" />
-  </Target>
 
   <Target Name="ExecuteWithSourceBuiltTooling"
           DependsOnTargets="
@@ -72,7 +44,27 @@
             '$(FromSource)' == 'true' and
             '$(InnerBuildFromSource)' != 'true'"
           BeforeTargets="Execute" />
-  
+
+  <Target Name="BuildUpstreamRepos"
+          Condition="'$(BuildUpstreamRepos)' == 'true'">
+    <ItemGroup>
+      <RepositoryReference Include="aspnetcore" />
+      <RepositoryReference Include="newtonsoft-json" />
+      <RepositoryReference Include="newtonsoft-json901" />
+      <RepositoryReference Include="toolset" />
+    </ItemGroup>
+
+    <MSBuild
+      Projects="$(SourceBuildEngineeringDir)build.proj"
+      Targets="PrepareOutput;InitBuild"
+      Properties="RepoRoot=$(RepoRoot)" />
+
+    <MSBuild
+      Projects="@(RepositoryReference -> '$(SourceBuildEngineeringDir)repos\%(Identity).proj')"
+      Properties="RepoRoot=$(RepoRoot)"
+      StopOnFirstFailure="true" />
+  </Target>
+
   <!--
     Separate target to execute to provide easy hook point for BeforeTargets that will only trigger
     when the inner build is actually happening. Hooking BeforeTargets on
