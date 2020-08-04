@@ -228,11 +228,6 @@
       <Sha>a46d93e5e100f9046cb589b5d4ba70bde41f3480</Sha>
       <RepoName>toolset</RepoName>
     </Dependency>
-    <Dependency Name="Microsoft.Dotnet.Sdk.Internal" Version="1.0.0-preview.20080.8">
-      <Uri>https://github.com/dotnet/core-sdk</Uri>
-      <Sha>573d158fea168b51e0f9e628d08c9d3ca8a40ef8</Sha>
-      <RepoName>core-sdk</RepoName>
-    </Dependency>
     <!-- external dependencies, not handled by Maestro/Arcade -->
     <Dependency Name="Newtonsoft.Json" Version="12.0.2">
       <Uri>https://github.com/adaggarwal/Newtonsoft.Json</Uri>
