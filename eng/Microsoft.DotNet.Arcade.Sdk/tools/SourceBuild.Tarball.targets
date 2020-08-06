@@ -22,8 +22,8 @@
   <PropertyGroup>
     <SkipArcadeSdkImport>true</SkipArcadeSdkImport>
   </PropertyGroup>
-  <Import Project="$([MSBuild]::GetPathOfFileAbove(Directory.Build.props, $(MSBuildThisFileDirectory)))" />
-  <Import Project="$([MSBuild]::GetPathOfFileAbove(Directory.Build.targets, $(MSBuildThisFileDirectory)))" />
+  <Import Project="$([MSBuild]::GetPathOfFileAbove(Directory.Build.props, $(SourceBuildEngineeringDir)))" />
+  <Import Project="$([MSBuild]::GetPathOfFileAbove(Directory.Build.targets, $(SourceBuildEngineeringDir)))" />
 
   <Import
     Project="SourceBuild.Tarball.DestructiveCleanup.targets"
