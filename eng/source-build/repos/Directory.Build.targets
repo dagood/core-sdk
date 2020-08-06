@@ -120,7 +120,7 @@
 
     <UpdateJson JsonFilePath="$(GlobalJsonFile)"
                 PathToAttribute="%(_PossibleCliVersionJsonPath.Identity)"
-                NewAttributeValue="$(SDK_VERSION)"
+                NewAttributeValue="$(NETCoreSdkVersion)"
                 SkipUpdateIfMissingKey="true" />
   </Target>
 
