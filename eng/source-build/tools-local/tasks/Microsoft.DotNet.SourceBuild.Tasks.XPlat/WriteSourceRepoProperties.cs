@@ -254,6 +254,11 @@ namespace Microsoft.DotNet.Build.Tasks
             var headPath = Path.Combine(headDirectory, "HEAD");
             Directory.CreateDirectory(headDirectory);
             File.WriteAllText(headPath, submoduleSha);
+
+            headDirectory = Path.Combine(sourceDirPath, submodulePath, ".git");
+            headPath = Path.Combine(headDirectory, "HEAD");
+            Directory.CreateDirectory(headDirectory);
+            File.WriteAllText(headPath, submoduleSha);
         }
 
         private static void WriteMinimalMetadata(string repoPath, string repoUrl, string hash)
