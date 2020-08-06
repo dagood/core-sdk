@@ -19,8 +19,6 @@
     <InnerSourceBuildRepoRoot Condition="'$(InnerSourceBuildRepoRoot)' == ''">$(CurrentRepoSourceBuildSourceDir)</InnerSourceBuildRepoRoot>
 
     <CleanInnerSourceBuildRepoRoot Condition="'$(CleanInnerSourceBuildRepoRoot)' == ''">true</CleanInnerSourceBuildRepoRoot>
-
-    <SourceBuildProjectFilename Condition="'$(SourceBuildProjectFilename)' == ''">$(GitHubRepositoryName)</SourceBuildProjectFilename>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -53,6 +51,10 @@
       Projects="$(SourceBuildEngineeringDir)build.proj"
       Targets="PrepareOutput;InitBuild"
       Properties="RepoRoot=$(RepoRoot)" />
+
+    <PropertyGroup>
+      <SourceBuildProjectFilename Condition="'$(SourceBuildProjectFilename)' == ''">$(GitHubRepositoryName).proj</SourceBuildProjectFilename>
+    </PropertyGroup>
 
     <MSBuild
       Projects="$(SourceBuildEngineeringDir)repos\$(SourceBuildProjectFilename)"

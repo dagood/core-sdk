@@ -1,6 +1,6 @@
 <Project>
 
-  <Import Project="SourceBuildArcade.targets" Condition="'$(FromSource)' == 'true'" />
+  <Import Project="$(RepositoryEngineeringDir)/Microsoft.DotNet.Arcade.Sdk/tools/SourceBuildArcade.targets" Condition="'$(FromSource)' == 'true'" />
 
   <PropertyGroup>
     <GitHubRepositoryName>installer</GitHubRepositoryName>
