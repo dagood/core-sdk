@@ -15,6 +15,19 @@ usage() {
   echo "  -h --help   Print help and exit."
 }
 
+# An alternative to "git clone" would be to use a "git worktree". Potential benefits:
+# * This has more integration with the user's normal repo. If they make ad-hoc changes in the
+#   worktree, it is easy to cherry-pick onto the developer's "real" branch.
+# * A worktree uses a '.git' file rather than a full '.git' directory, which might have storage
+#   implications. (However, a local clone's '.git' directory uses hard links to save space/time,
+#   so it's not certain that this affects performance at all.)
+# 
+# Downside of worktrees:
+# * Some configuration is set up in '.git/worktrees' which may be difficult to coordinate
+#   properly. In particular, if the user is already using worktrees for their own purposes, we
+#   would have to be careful that running source-build in one worktree doesn't interfere with
+#   source-build in the other worktree.
+
 set -euo pipefail
 
 while [[ $# > 0 ]]; do

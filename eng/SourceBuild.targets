@@ -1,6 +1,7 @@
 <Project>
 
-  <Target Name="GetSourceBuildCommandConfiguration">
+  <Target Name="GetRepoSpecificSourceBuildCommandConfiguration"
+          BeforeTargets="GetSourceBuildCommandConfiguration">
     <PropertyGroup>
       <PlatformRid>centos.7</PlatformRid>
       <PlatformArchRid>$(PlatformRid)-x64</PlatformArchRid>
@@ -13,7 +14,6 @@
       <InnerBuildArgs>$(InnerBuildArgs) /p:Configuation=Release</InnerBuildArgs>
       <InnerBuildArgs>$(InnerBuildArgs) /nr:false</InnerBuildArgs>
       <InnerBuildArgs>$(InnerBuildArgs) /v:minimal</InnerBuildArgs>
-      <InnerBuildArgs>$(InnerBuildArgs) /bl:$(CurrentRepoSourceBuildArtifactsDir)msbuild.binlog</InnerBuildArgs>
 
       <InnerBuildArgs>$(InnerBuildArgs) /p:SkipBuildingInstallers=true</InnerBuildArgs>
       <InnerBuildArgs>$(InnerBuildArgs) /p:IncludeNuGetPackageArchive=false</InnerBuildArgs>
@@ -27,7 +27,6 @@
       <InnerBuildArgs>$(InnerBuildArgs) /p:AspNetCoreSharedFxInstallerRid=$(PortableArchRid)</InnerBuildArgs>
       <InnerBuildArgs>$(InnerBuildArgs) /p:CoreSetupRid=$(PlatformArchRid)</InnerBuildArgs>
 
-      <InnerBuildArgs>$(InnerBuildArgs) /p:ArtifactsDir=$(CurrentRepoSourceBuildArtifactsDir)</InnerBuildArgs>
       <InnerBuildArgs>$(InnerBuildArgs) /p:CoreSetupBlobRootUrl=$(SourceBuildReleaseDirUri)blobs/</InnerBuildArgs>
       <InnerBuildArgs>$(InnerBuildArgs) /p:DotnetToolsetBlobRootUrl=$(SourceBuildReleaseDirUri)blobs/</InnerBuildArgs>
       <InnerBuildArgs>$(InnerBuildArgs) /p:PB_PackageVersionPropsUrl=$(SourceBuildReleaseDirUri)PackageVersions.props</InnerBuildArgs>
