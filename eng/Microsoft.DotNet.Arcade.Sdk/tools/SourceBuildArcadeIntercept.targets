@@ -37,12 +37,23 @@
           DependsOnTargets="
             BuildUpstreamRepos;
             GetSourceBuildCommandConfiguration;
-            ExecuteInnerSourceBuild;
+            RunInnerSourceBuildCommand;
             PackSourceBuildIntermediateNupkg;
             PackSourceBuildTarball"
           Condition="
             '$(FromSource)' == 'true' and
             '$(InnerBuildFromSource)' != 'true'"
+          BeforeTargets="Execute" />
+
+  <!--
+    Separate target to execute to provide easy hook point for BeforeTargets that will only trigger
+    when the inner build is actually happening. Hooking BeforeTargets on
+    ExecuteWithSourceBuiltTooling runs unconditionally, for example, inside the core-sdk build.
+  -->
+  <Target Name="ExecuteInnerSourceBuild"
+          Condition="
+            '$(FromSource)' == 'true' and
+            '$(InnerBuildFromSource)' == 'true'"
           BeforeTargets="Execute" />
 
   <Target Name="BuildUpstreamRepos"
@@ -114,12 +125,7 @@
     <Exec Command="$(MSBuildThisFileDirectory)git-clone-to-dir.sh $(_GitCloneToDirArgs)" />
   </Target>
 
-  <!--
-    Separate target to execute to provide easy hook point for BeforeTargets that will only trigger
-    when the inner build is actually happening. Hooking BeforeTargets on
-    ExecuteWithSourceBuiltTooling runs unconditionally, for example, inside the core-sdk build.
-  -->
-  <Target Name="ExecuteInnerSourceBuild"
+  <Target Name="RunInnerSourceBuildCommand"
           DependsOnTargets="PrepareInnerSourceBuildRepoRoot">
     <PropertyGroup>
       <!-- Prevent any projects from building in the outside build: they would use prebuilts. -->
@@ -131,6 +137,8 @@
         enough on Arcade for this to work nicely.
       -->
       <BaseInnerSourceBuildCommand Condition="'$(BaseInnerSourceBuildCommand)' == ''">$(ARCADE_BUILD_TOOL_COMMAND)</BaseInnerSourceBuildCommand>
+      <!-- TODO: (arcade-sb) Remove prototype fallback after Arcade shared build.sh update. Actual: ARCADE_BUILD_TOOL_COMMAND -->
+      <BaseInnerSourceBuildCommand Condition="'$(BaseInnerSourceBuildCommand)' == ''">$(REPO_BUILD_TOOL_COMMAND)</BaseInnerSourceBuildCommand>
     </PropertyGroup>
 
     <Exec
