@@ -119,7 +119,8 @@
     when the inner build is actually happening. Hooking BeforeTargets on
     ExecuteWithSourceBuiltTooling runs unconditionally, for example, inside the core-sdk build.
   -->
-  <Target Name="ExecuteInnerSourceBuild">
+  <Target Name="ExecuteInnerSourceBuild"
+          DependsOnTargets="PrepareInnerSourceBuildRepoRoot">
     <PropertyGroup>
       <!-- Prevent any projects from building in the outside build: they would use prebuilts. -->
       <PreventPrebuiltBuild>true</PreventPrebuiltBuild>
