@@ -2,4 +2,8 @@
 
   <Import Project="SourceBuildArcade.targets" Condition="'$(FromSource)' == 'true'" />
 
+  <PropertyGroup>
+    <GitHubRepositoryName>installer</GitHubRepositoryName>
+  </PropertyGroup>
+
 </Project>

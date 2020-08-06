@@ -19,6 +19,8 @@
     <InnerSourceBuildRepoRoot Condition="'$(InnerSourceBuildRepoRoot)' == ''">$(CurrentRepoSourceBuildSourceDir)</InnerSourceBuildRepoRoot>
 
     <CleanInnerSourceBuildRepoRoot Condition="'$(CleanInnerSourceBuildRepoRoot)' == ''">true</CleanInnerSourceBuildRepoRoot>
+
+    <SourceBuildProjectFilename Condition="'$(SourceBuildProjectFilename)' == ''">$(GitHubRepositoryName)</SourceBuildProjectFilename>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -47,22 +49,17 @@
 
   <Target Name="BuildUpstreamRepos"
           Condition="'$(BuildUpstreamRepos)' == 'true'">
-    <ItemGroup>
-      <RepositoryReference Include="aspnetcore" />
-      <RepositoryReference Include="newtonsoft-json" />
-      <RepositoryReference Include="newtonsoft-json901" />
-      <RepositoryReference Include="toolset" />
-    </ItemGroup>
-
     <MSBuild
       Projects="$(SourceBuildEngineeringDir)build.proj"
       Targets="PrepareOutput;InitBuild"
       Properties="RepoRoot=$(RepoRoot)" />
 
     <MSBuild
-      Projects="@(RepositoryReference -> '$(SourceBuildEngineeringDir)repos\%(Identity).proj')"
+      Projects="$(SourceBuildEngineeringDir)repos\$(SourceBuildProjectFilename)"
+      Targets="BuildRepoReferences"
       Properties="RepoRoot=$(RepoRoot)"
       StopOnFirstFailure="true" />
+    <!-- TODO: (arcade-sb) Support building upstreams from source based on int nupkgs. -->
   </Target>
 
   <!--

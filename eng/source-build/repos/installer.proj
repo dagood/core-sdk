@@ -66,8 +66,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <RepositoryReference Include="application-insights" />
     <RepositoryReference Include="arcade" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(SmallDevBuild)' != 'true'">
+    <RepositoryReference Include="application-insights" />
     <RepositoryReference Include="aspnetcore-tooling" />
     <RepositoryReference Include="aspnetcore" />
     <RepositoryReference Include="clicommandlineparser" />
