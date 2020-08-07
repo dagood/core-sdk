@@ -288,7 +288,8 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="RunCopyAndDisassembleReferenceOnlyPackages">
+  <Target Name="RunCopyAndDisassembleReferenceOnlyPackages"
+          Condition="'$(SmallDevBuild)' != 'true'">
     <MSBuild
       Projects="$(SourceBuildEngineeringDir)build.proj"
       Targets="CopyAndDisassembleReferenceOnlyPackages"
