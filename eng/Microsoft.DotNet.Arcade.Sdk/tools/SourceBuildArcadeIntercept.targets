@@ -7,7 +7,7 @@
   -->
 
   <PropertyGroup>
-    <SourceBuildOutputDir>$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'source-build'))</SourceBuildOutputDir>
+    <SourceBuildOutputDir Condition="'$(SourceBuildOutputDir)' == ''">$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'source-build'))</SourceBuildOutputDir>
     <SourceBuildSelfDir>$([MSBuild]::NormalizeDirectory('$(SourceBuildOutputDir)', 'self'))</SourceBuildSelfDir>
     <CurrentRepoSourceBuildArtifactsDir>$([MSBuild]::NormalizeDirectory('$(SourceBuildSelfDir)', 'artifacts'))</CurrentRepoSourceBuildArtifactsDir>
     <CurrentRepoSourceBuildSourceDir>$([MSBuild]::NormalizeDirectory('$(SourceBuildSelfDir)', 'src'))</CurrentRepoSourceBuildSourceDir>
@@ -95,6 +95,9 @@
 
       <!-- Let the inner build use the outer build's copy of the source-build tasks. -->
       <InnerBuildArgs>$(InnerBuildArgs) /p:XPlatSourceBuildTasksAssembly=$(XPlatSourceBuildTasksAssembly)</InnerBuildArgs>
+      <!-- The inner build needs to reference the overall output dir for nupkg transport etc. -->
+      <InnerBuildArgs>$(InnerBuildArgs) /p:SourceBuildOutputDir=$(SourceBuildOutputDir)</InnerBuildArgs>
+      <InnerBuildArgs>$(InnerBuildArgs) /p:SourceBuiltBlobFeedDir=$(SourceBuiltBlobFeedDir)</InnerBuildArgs>
 
       <!-- Work around issue where local clone may cause failure using non-origin remote fallback: https://github.com/dotnet/sourcelink/issues/629 -->
       <InnerBuildArgs>$(InnerBuildArgs) /p:EnableSourceControlManagerQueries=false</InnerBuildArgs>

@@ -10,6 +10,11 @@
       <SourceBuildReleaseDirUri>file://$(SourceBuildArtifactsDir)obj/x64/Release/</SourceBuildReleaseDirUri>
     </PropertyGroup>
 
+    <PropertyGroup Condition="'$(SmallDevBuild)' == 'true'">
+      <PlatformRid>linux</PlatformRid>
+      <PlatformArchRid>$(PlatformRid)-x64</PlatformArchRid>
+    </PropertyGroup>
+
     <PropertyGroup>
       <InnerBuildArgs>$(InnerBuildArgs) /p:Configuation=Release</InnerBuildArgs>
       <InnerBuildArgs>$(InnerBuildArgs) /nr:false</InnerBuildArgs>
@@ -26,9 +31,14 @@
 
       <InnerBuildArgs>$(InnerBuildArgs) /p:AspNetCoreSharedFxInstallerRid=$(PortableArchRid)</InnerBuildArgs>
       <InnerBuildArgs>$(InnerBuildArgs) /p:CoreSetupRid=$(PlatformArchRid)</InnerBuildArgs>
+    </PropertyGroup>
 
+    <PropertyGroup Condition="'$(SmallDevBuild)' != 'true'">
       <InnerBuildArgs>$(InnerBuildArgs) /p:CoreSetupBlobRootUrl=$(SourceBuildReleaseDirUri)blobs/</InnerBuildArgs>
       <InnerBuildArgs>$(InnerBuildArgs) /p:DotnetToolsetBlobRootUrl=$(SourceBuildReleaseDirUri)blobs/</InnerBuildArgs>
+    </PropertyGroup>
+
+    <PropertyGroup>
       <InnerBuildArgs>$(InnerBuildArgs) /p:PB_PackageVersionPropsUrl=$(SourceBuildReleaseDirUri)PackageVersions.props</InnerBuildArgs>
     </PropertyGroup>
 
