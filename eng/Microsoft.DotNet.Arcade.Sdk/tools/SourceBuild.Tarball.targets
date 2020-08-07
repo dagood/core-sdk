@@ -5,6 +5,7 @@
           DependsOnTargets="
             GetTarballDirProps;
             AddTarballSource;
+            AddTarballSelfSource;
             AddTarballSourcelinkMetadata;
             AddTarballTools;
             AddTarballGeneratedSource;
@@ -41,6 +42,21 @@
     </PropertyGroup>
 
     <MakeDir Directories="$(TarballRootDir)" />
+  </Target>
+
+  <Target Name="AddTarballSelfSource"
+          DependsOnTargets="GetTarballDirProps"
+          Condition="'$(SkipAddTarballSource)' != 'true'">
+    <PropertyGroup>
+      <TarballSelfSourceDir>$([MSBuild]::NormalizeDirectory('$(TarballSourceDir)', '$(GitHubRepositoryName)'))</TarballSelfSourceDir>
+
+      <_GitCloneToDirArgs />
+      <_GitCloneToDirArgs>$(_GitCloneToDirArgs) --source &quot;$(RepoRoot)&quot;</_GitCloneToDirArgs>
+      <_GitCloneToDirArgs>$(_GitCloneToDirArgs) --dest &quot;$(TarballSelfSourceDir)&quot;</_GitCloneToDirArgs>
+      <_GitCloneToDirArgs>$(_GitCloneToDirArgs) --copy-wip</_GitCloneToDirArgs>
+    </PropertyGroup>
+
+    <Exec Command="$(MSBuildThisFileDirectory)git-clone-to-dir.sh $(_GitCloneToDirArgs)" />
   </Target>
 
   <Target Name="AddTarballSource"
