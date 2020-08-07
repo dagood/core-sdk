@@ -32,7 +32,6 @@
       <RepositoryReference Include="aspnetcore" />
       <RepositoryReference Include="newtonsoft-json" />
       <RepositoryReference Include="newtonsoft-json901" />
-      <RepositoryReference Include="toolset" />
     </ItemGroup>
 
     <MSBuild
