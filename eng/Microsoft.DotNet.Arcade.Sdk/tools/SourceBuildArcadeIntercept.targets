@@ -46,15 +46,19 @@
           BeforeTargets="Execute" />
 
   <!--
-    Separate target to execute to provide easy hook point for BeforeTargets that will only trigger
-    when the inner build is actually happening. Hooking BeforeTargets on
-    ExecuteWithSourceBuiltTooling runs unconditionally, for example, inside the core-sdk build.
+    ExecuteInnerSourceBuild provides a BeforeTargets hook point that will only trigger when the
+    inner build is actually happening.
+
+    HookExecuteInnerSourceBuild is separate: a BeforeTargets on HookExecuteInnerSourceBuild would
+    always execute because BeforeTargets runs even if the condition isn't met.
   -->
-  <Target Name="ExecuteInnerSourceBuild"
+  <Target Name="ExecuteInnerSourceBuild" />
+  <Target Name="HookExecuteInnerSourceBuild"
           Condition="
             '$(FromSource)' == 'true' and
             '$(InnerBuildFromSource)' == 'true'"
-          BeforeTargets="Execute" />
+          DependsOnTargets="ExecuteInnerSourceBuild"
+          BeforeTargets="Execute"/>
 
   <Target Name="BuildUpstreamRepos"
           Condition="'$(BuildUpstreamRepos)' == 'true'">
