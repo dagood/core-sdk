@@ -1,12 +1,12 @@
-From 44486c4ab27e8667ab5c42467759f1cccb92697c Mon Sep 17 00:00:00 2001
+From 245d6524c763f7cdd57752cbe6aa6efa5d0762c2 Mon Sep 17 00:00:00 2001
 From: Chris Rummel <crummel@microsoft.com>
-Date: Sun, 20 Oct 2019 15:51:49 -0500
-Subject: [PATCH 1/5] Don't build fullfx
+Date: Mon, 3 Aug 2020 15:43:31 -0500
+Subject: [PATCH] Upgrade net46 to net472.
 
 ---
  .../Microsoft.NET.Sdk.Razor.csproj                     | 10 +++++-----
- .../netstandard2.0/Sdk.Razor.CurrentVersion.targets    |  4 ++--
- 2 files changed, 7 insertions(+), 7 deletions(-)
+ .../netstandard2.0/Sdk.Razor.CurrentVersion.targets    |  2 +-
+ 2 files changed, 6 insertions(+), 6 deletions(-)
 
 diff --git a/src/Razor/src/Microsoft.NET.Sdk.Razor/Microsoft.NET.Sdk.Razor.csproj b/src/Razor/src/Microsoft.NET.Sdk.Razor/Microsoft.NET.Sdk.Razor.csproj
 index ba32df8e2..4f8eccee6 100644
@@ -46,16 +46,14 @@ index ba32df8e2..4f8eccee6 100644
  
      <Copy SourceFiles="@(ProjectOutput)" DestinationFiles="$(SdkOutputPath)tasks\%(RecursiveDir)%(FileName)%(Extension)" SkipUnchangedFiles="true">
 diff --git a/src/Razor/src/Microsoft.NET.Sdk.Razor/build/netstandard2.0/Sdk.Razor.CurrentVersion.targets b/src/Razor/src/Microsoft.NET.Sdk.Razor/build/netstandard2.0/Sdk.Razor.CurrentVersion.targets
-index e5e8d926a..b0a7c5ea3 100644
+index 0b6cf4555..133fa7759 100644
 --- a/src/Razor/src/Microsoft.NET.Sdk.Razor/build/netstandard2.0/Sdk.Razor.CurrentVersion.targets
 +++ b/src/Razor/src/Microsoft.NET.Sdk.Razor/build/netstandard2.0/Sdk.Razor.CurrentVersion.targets
-@@ -30,8 +30,8 @@ Copyright (c) .NET Foundation. All rights reserved.
-     <!-- Paths to tools, tasks, and extensions are calculated relative to the RazorSdkDirectoryRoot. This can be modified to test a local build. -->
+@@ -31,7 +31,7 @@ Copyright (c) .NET Foundation. All rights reserved.
      <RazorSdkDirectoryRoot Condition="'$(RazorSdkDirectoryRoot)'==''">$(MSBuildThisFileDirectory)..\..\</RazorSdkDirectoryRoot>
      <RazorSdkBuildTasksDirectoryRoot Condition="'$(RazorSdkBuildTasksDirectoryRoot)'==''">$(RazorSdkDirectoryRoot)tasks\</RazorSdkBuildTasksDirectoryRoot>
--    <_RazorSdkTasksTFM Condition=" '$(MSBuildRuntimeType)' == 'Core'">netcoreapp3.1</_RazorSdkTasksTFM>
+     <_RazorSdkTasksTFM Condition=" '$(MSBuildRuntimeType)' == 'Core'">net5.0</_RazorSdkTasksTFM>
 -    <_RazorSdkTasksTFM Condition=" '$(_RazorSdkTasksTFM)' == ''">net46</_RazorSdkTasksTFM>
-+    <_RazorSdkTasksTFM Condition=" '$(MSBuildRuntimeType)' == 'Core'">$(DefaultNetCoreTargetFramework)</_RazorSdkTasksTFM>
 +    <_RazorSdkTasksTFM Condition=" '$(_RazorSdkTasksTFM)' == ''">net472</_RazorSdkTasksTFM>
      <RazorSdkBuildTasksAssembly>$(RazorSdkBuildTasksDirectoryRoot)$(_RazorSdkTasksTFM)\Microsoft.NET.Sdk.Razor.Tasks.dll</RazorSdkBuildTasksAssembly>
    </PropertyGroup>

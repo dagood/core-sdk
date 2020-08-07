@@ -159,9 +159,9 @@
       <Sha>916b5cba268e1e1e803243004f4276cf40b2dda8</Sha>
       <RepoName>core-setup-portable</RepoName>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Mvc.Razor.Extensions" Version="3.1.2" CoherentParentDependency="Microsoft.AspNetCore.App.Ref">
+    <Dependency Name="Microsoft.AspNetCore.Mvc.Razor.Extensions" Version="5.0.0-preview.5.20278.2" CoherentParentDependency="Microsoft.AspNetCore.App.Ref">
       <Uri>https://github.com/dotnet/aspnetcore-tooling</Uri>
-      <Sha>2dab42e151ea8020a75cdaaa8c46bf5d9093b8c0</Sha>
+      <Sha>c13871ff871041d9b85895a58cd08b574f125a16</Sha>
       <RepoName>aspnetcore-tooling</RepoName>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Common.ItemTemplates" Version="3.1.2" CoherentParentDependency="Microsoft.Dotnet.Sdk.Internal">
@@ -172,18 +172,18 @@
       <Uri>https://github.com/dotnet/roslyn</Uri>
       <Sha>fb7b2e716d163b7abebf57db505e01a4a521ddae</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build" Version="16.4.0" CoherentParentDependency="Microsoft.Dotnet.Toolset.Internal">
+    <Dependency Name="Microsoft.Build" Version="16.7.0-preview-20220-01" CoherentParentDependency="Microsoft.Dotnet.Toolset.Internal">
       <Uri>https://github.com/microsoft/msbuild</Uri>
-      <Sha>e901037fe1815eae17424f860412d0b967d09461</Sha>
+      <Sha>80e487bff4b7adced47cab46b3481f1a5f2b3178</Sha>
     </Dependency>
     <Dependency Name="NuGet.Build.Tasks" Version="5.4.0-rtm.6292" CoherentParentDependency="Microsoft.Dotnet.Toolset.Internal">
       <Uri>https://github.com/NuGet/NuGet.Client</Uri>
       <Sha>6f8eb3a2e1db6b458451b9cfd2a4f5557769b041</Sha>
       <RepoName>nuget-client</RepoName>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Logging" Version="3.1.2" CoherentParentDependency="Microsoft.AspNetCore.Mvc.Razor.Extensions">
+    <Dependency Name="Microsoft.Extensions.Logging" Version="5.0.0-preview.7.20365.19" CoherentParentDependency="Microsoft.AspNetCore.Mvc.Razor.Extensions">
       <Uri>https://github.com/dotnet/extensions</Uri>
-      <Sha>1286a6ff55e300352dabeb6d778c9fcdd258bd08</Sha>
+      <Sha>cc38b0d85cfd7d46bc89140a7cf2ce97fba74bad</Sha>
       <RepoName>aspnet-extensions</RepoName>
     </Dependency>
     <Dependency Name="Microsoft.NET.Sdk" Version="3.1.102-servicing.20068.5" CoherentParentDependency="Microsoft.Dotnet.Toolset.Internal">

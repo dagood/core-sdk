@@ -1,14 +1,14 @@
-From ba039fcbbd3ca51a8f80c08a35481d191afaa41f Mon Sep 17 00:00:00 2001
+From 97490403d76af67cdfc106d6db3b745c3a04e583 Mon Sep 17 00:00:00 2001
 From: adaggarwal <aditya.aggarwal@microsoft.com>
 Date: Thu, 14 Nov 2019 16:57:39 +0000
-Subject: [PATCH 3/7] Exclude some projects from source-build
+Subject: [PATCH 04/13] Exclude some projects from source-build
 
 ---
  Directory.Build.props | 2 ++
  1 file changed, 2 insertions(+)
 
 diff --git a/Directory.Build.props b/Directory.Build.props
-index 4b42f630ad..389220d8d6 100644
+index 3857d9c35b..4687bd3741 100644
 --- a/Directory.Build.props
 +++ b/Directory.Build.props
 @@ -20,9 +20,11 @@
