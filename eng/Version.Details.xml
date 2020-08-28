@@ -146,7 +146,7 @@
   <ToolsetDependencies>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="5.0.0-beta.20417.6">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>83fda4b3f6d93e713749fd1b27c4a6d40b118b13</Sha>
+      <Sha>f69dcc05402db71e5e3c02db9a19910af78a85fb</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Build.Tasks.Installers" Version="5.0.0-beta.20417.6">
       <Uri>https://github.com/dotnet/arcade</Uri>
@@ -160,7 +160,7 @@
       <Uri>https://github.com/dotnet/source-build-reference-packages</Uri>
       <Sha>639aeb4d76c8b1a6226bf7c4edb34fbdae30e6e1</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.SourceLink" Version="1.0.0" CoherentParentDependency="Microsoft.DotNet.Arcade.Sdk">
+    <Dependency Name="Microsoft.SourceLink.GitHub" Version="1.0.0" CoherentParentDependency="Microsoft.DotNet.Arcade.Sdk">
       <Uri>https://github.com/dotnet/sourcelink</Uri>
       <Sha>f175b06862f889474b689a57527e489101c774cc</Sha>
     </Dependency>
